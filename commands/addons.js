@@ -146,12 +146,17 @@ function displayForApp(app, addons) {
         let name    = style('addon', addon.name);
         let service = addon.addon_service.name;
 
-        return `${service} (${name})`;
+        if(addon.addon_service.supports_sharing) {
+            return `${service} (${name})`;
+        } else {
+            return service;
+        }
         // return `${name} (${service})`;
     }
 
     addons = _.sortByAll(addons,
                          isForeignApp,
+                         'addon_service.supports_sharing',
                          'plan.name',
                          'addon.name');
     cli.log ();
@@ -196,14 +201,16 @@ function displayForApp(app, addons) {
                                    'app.name',
                                    'name');
 
-            // Print each attachment under the add-on
-            atts.forEach(function(attachment, idx) {
-                let isFirst = (idx === addon.attachments.length - 1);
-                cli.log(renderAttachment(attachment, app, isFirst));
-            });
+            if(addon.addon_service.supports_sharing) {
+                // Print each attachment under the add-on
+                atts.forEach(function(attachment, idx) {
+                    let isFirst = (idx === addon.attachments.length - 1);
+                    cli.log(renderAttachment(attachment, app, isFirst));
+                });
 
-            // Separate each add-on row by a blank line
-            cli.log("");
+                // Separate each add-on row by a blank line
+                cli.log("");
+            }
         }
     });
 
