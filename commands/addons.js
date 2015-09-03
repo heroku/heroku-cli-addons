@@ -13,7 +13,7 @@ let table       = util.table,
 // Gets *all* attachments and add-ons and filters locally because the API
 // returns *owned* items not associated items.
 function* addonGetter(api, app) {
-    let attachments, addons;
+    let attachments, addons, vars;
 
     if(app) { // don't disploy attachments globally
         addons = api.request({
@@ -21,6 +21,8 @@ function* addonGetter(api, app) {
             path:    `/apps/${app}/addons`,
             headers: {'Accept-Expansion': 'addon_service,plan'},
         });
+
+        vars = api.apps(app).configVars().info();
 
         let sudoHeaders = JSON.parse(process.env.HEROKU_HEADERS || '{}');
         if(sudoHeaders['X-Heroku-Sudo'] && !sudoHeaders['X-Heroku-Sudo-User']) {
@@ -45,7 +47,8 @@ function* addonGetter(api, app) {
     }
 
     // Get addons and attachments in parallel
-    let items = yield [addons, attachments];
+    let items = yield [addons, attachments, vars];
+    vars = _.keys(items[2]);
 
     function isRelevantToApp(addon) {
         return !app ||
@@ -58,10 +61,16 @@ function* addonGetter(api, app) {
     addons = [];
     items[0].forEach(function(addon) {
         addon.attachments = attachments[addon.id] || [];
-
         delete attachments[addon.id];
 
         if(isRelevantToApp(addon)) {
+            let att = _.find(addon.attachments, function(a) { return a.app.name === app; });
+            if(att) {
+                let prefix = att.name + '_';
+                addon.vars = _.map(_.filter(vars, function(v) { return _.startsWith(v, prefix); }), function(v) {
+                    return v.slice(prefix.length);
+                }).sort();
+            }
             addons.push(addon);
         }
     });
@@ -114,12 +123,22 @@ function displayAll(addons) {
     });
 }
 
-function formatAttachment(attachment, showApp) {
+function formatAttachment(attachment, showApp, addon) {
+    let vars = '';
     if(showApp === undefined) { showApp = true; }
 
     let attName = style('attachment', attachment.name);
 
-    let output = [attName];
+    if(addon.vars.length > 0) {
+        vars = addon.vars.join(',');
+        if(addon.vars.length > 1) {
+            vars = '{'+ vars +'}';
+        }
+        vars = '_' + vars;
+    }
+    vars = style('dim', vars);
+
+    let output = [attName + vars];
     if(showApp) {
         let appInfo = `➞  to ${style('app', attachment.app.name)} app`;
         output.push(style('dim', appInfo));
@@ -128,9 +147,9 @@ function formatAttachment(attachment, showApp) {
     return output.join(' ');
 }
 
-function renderAttachment(attachment, app, isFirst) {
+function renderAttachment(attachment, app, isFirst, addon) {
     let line = isFirst ? '└─' : '├─';
-    let attName = formatAttachment(attachment, attachment.app.name !== app);
+    let attName = formatAttachment(attachment, attachment.app.name !== app, addon);
     return printf(' %s %s', style('dim', line), attName);
 }
 
@@ -154,7 +173,8 @@ function displayForApp(app, addons) {
                          isForeignApp,
                          'plan.name',
                          'addon.name');
-    cli.log ();
+
+    cli.log();
     table(addons, {
         headerAnsi: cli.color.bold,
         columns: [{
@@ -164,7 +184,7 @@ function displayForApp(app, addons) {
                 let addonLength      = cli.color.stripColor(presentAddon(addon)).length;
                 let attachmentLength = _.max(
                     _.map(addon.attachments, function(att) {
-                        return cli.color.stripColor(renderAttachment(att, app)).length;
+                        return cli.color.stripColor(renderAttachment(att, app, true, addon)).length;
                     }));
 
                 return Math.max(addonLength, attachmentLength);
@@ -199,7 +219,7 @@ function displayForApp(app, addons) {
             // Print each attachment under the add-on
             atts.forEach(function(attachment, idx) {
                 let isFirst = (idx === addon.attachments.length - 1);
-                cli.log(renderAttachment(attachment, app, isFirst));
+                cli.log(renderAttachment(attachment, app, isFirst, addon));
             });
 
             // Separate each add-on row by a blank line
