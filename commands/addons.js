@@ -238,7 +238,6 @@ module.exports = {
     needsAuth: true,
     preauth:   true,
     wantsApp:  true,
-    // args:      [{name: 'addon', optional: true}],
     flags:     [
       {
         name:        'all',
@@ -259,32 +258,41 @@ module.exports = {
     help:        `The default filter applied depends on whether you are in a Heroku app
 directory. If so, the --app flag is implied. If not, the default of --all
 is implied. Explicitly providing either flag overrides the default
-behaviour.
+behavior.
 
 Examples:
 
   $ heroku ${topic} --all
-  $ heroku ${topic} --app acme-inc-website
+  $ heroku ${topic} --app acme-inc-www
 
-Identifying specific add-ons:
+Overview of Add-ons:
 
-  Add-ons have canonical names (ADDON_NAME in these command help texts).
-  They also application-specific names called aliases or attachments. In
-  many cases, these names can be used interchangeably when unambiguous.
+  Add-ons are created with the \`addons:create\` command, providing a reference
+  to an add-on service (such as \`heroku-postgresql\`) or a service and plan
+  (such as \`heroku-postgresql:hobby-dev\`).
 
-  For example, given a fictional \`slowdb\` add-on named \`slowdb-cubed-1531\`
-  attached as \`FOO_DB\` to \`app1\` and BAR_DB to \`app2\`, the following
-  invocations are considered equivalent:
+  At creation, each add-on is assigned a globally unique name (or one can be
+  provided by the user). Each add-on has at least one attachment alias to each
+  application which uses the add-on. In all cases, the owning application will
+  be attached to the add-on. An attachment alias is unique to its application,
+  and is used as a prefix to any environment variables it exports to the
+  application.
 
-  $ heroku addons:upgrade slowdb             slowdb:premium
-  $ heroku addons:upgrade --app app1 FOO_DB  slowdb:premium
-  $ heroku addons:upgrade app1::FOO_DB       slowdb:premium
-  $ heroku addons:upgrade app2::BAR_DB       slowdb:premium
-  $ heroku addons:upgrade acme-inc-datastore slowdb:premium
+  For instance, a \`heroku-postgresql:hobby-dev\` add-on named \`www-db\`, which
+  is owned by \`acme-inc-www\` and shared with \`acme-inc-dwh\` is represented
+  below:
 
-  If the name used is ambiguous (e.g. if you used \`slowdb\` with more than
-  one add-on of that type installed), the command will error due to
-  ambiguity and a more specific identifier will need to be chosen.
+    $ heroku addons --app acme-inc-www
+    Add-on                               Plan       Price
+    ───────────────────────────────────  ─────────  ──────
+    heroku-postgresql (www-db)           hobby-dev  free
+     ├─ as DATABASE
+     └─ as WWW_DB on acme-inc-dwh app
+
+  In that example, \`DATABASE\` is an attachment alias on the owning application
+  and exports \`DATABASE_URL\` to that application while \`WWW_DB\` is an
+  attachment alias to the \`acme-inc-dwh\` application and shares the add-on to
+  that application by exporting \`WWW_DB_URL\` to it.
 
   For more information, read https://devcenter.heroku.com/articles/add-ons.`
 };
