@@ -2,10 +2,9 @@
 
 let cli      = require('heroku-cli-util');
 let co       = require('co');
-let resolver = require('../../lib/resolve');
 let _        = require('lodash');
-
-let formatPrice = p => p.cents === 0 ? 'free' : `$${(p.cents/100)}.00/${p.unit}`;
+let resolver = require('../../lib/resolve');
+let util     = require('../../lib/util');
 
 class Upgrade {
   run (context, heroku) {
@@ -44,7 +43,7 @@ class Upgrade {
           }
         }).catch(e => this.handlePlanChangeAPIError(e))
       );
-      cli.console.error(`done, ${cli.color.green(formatPrice(this.addon.plan.price))}`);
+      cli.console.error(`done, ${cli.color.green(util.formatPrice(this.addon.plan.price))}`);
       if (this.addon.provision_message) cli.log(this.addon.provision_message);
     }.bind(this));
   }
