@@ -32,7 +32,7 @@ class Upgrade {
       this.service = this.addon.addon_service.name;
       this.app     = this.addon.app.name;
       this.plan    = `${this.service}:${this.plan}`;
-      this.addon = yield cli.action(`Changing ${cli.color.magenta(this.addon.name)} on ${cli.color.cyan(this.app)} from ${cli.color.yellow(this.addon.plan.name)} to ${cli.color.blue(this.plan)}`, {success: false},
+      this.addon = yield cli.action(`Changing ${cli.color.magenta(this.addon.name)} on ${cli.color.cyan(this.app)} from ${cli.color.blue(this.addon.plan.name)} to ${cli.color.blue(this.plan)}`, {success: false},
         heroku.request({
           path: `/apps/${this.app}/addons/${this.addon.name}`,
           method: 'PATCH',
