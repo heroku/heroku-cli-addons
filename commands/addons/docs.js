@@ -10,7 +10,7 @@ function* run (context, heroku) {
   if (!addon) addon = (yield resolve.addon(heroku, context.app, id)).addon_service;
   let url = `https://devcenter.heroku.com/articles/${addon.name}`;
 
-  if (context.flags.url) {
+  if (context.flags['show-url']) {
     cli.log(url);
   } else {
     cli.log(`Opening ${cli.color.cyan(url)}...`);
@@ -24,7 +24,7 @@ module.exports = {
   wantsApp:    true,
   needsAuth:   true,
   args:        [{name: 'addon'}],
-  flags:       [{name: 'url', description: 'print URL, do not open browser'}],
+  flags:       [{name: 'show-url', description: 'show URL, do not open browser'}],
   run:         cli.command({preauth: true}, co.wrap(run)),
   description: `open an add-on's Dev Center documentation in your browser`
 };
