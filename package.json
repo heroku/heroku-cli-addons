@@ -25,10 +25,11 @@
     "jshint": "^2.8.0",
     "mocha": "^2.2.5",
     "nock": "5.2.1",
-    "nyc": "6.2.1"
+    "nyc": "6.2.1",
+    "unexpected": "10.13.2"
   },
   "scripts": {
-    "test": "nyc mocha --require ./test/init.js && jshint .",
+    "test": "nyc mocha && jshint .",
     "coverage": "nyc report --reporter=text-lcov | coveralls",
     "preversion": "npm test",
     "postversion": "git push && git push --tags"
