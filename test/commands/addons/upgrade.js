@@ -53,7 +53,8 @@ describe('addons:upgrade', () => {
     return cmd.run({app: 'myapp', args: {addon: 'heroku-redis:invalid'}})
     .then(() => expect(cli.stdout, 'to be empty'))
     .then(() => expect(cli.stderr, 'to equal', `Changing redis-swiftly-123 on myapp from premium-0 to heroku-redis:invalid... !!!
- ▸    Couldn't find either the add-on service or the add-on plan of "heroku-redis:invalid".
+ ▸    Couldn't find either the add-on service or the add-on plan of
+ ▸    "heroku-redis:invalid".
  ▸    
  ▸    Here are the available plans for heroku-redis:
  ▸    heroku-redis:free
