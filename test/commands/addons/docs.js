@@ -1,10 +1,11 @@
 'use strict'
-/* globals describe beforeEach it commands cli expect nock */
+/* globals describe beforeEach afterEach it commands cli expect nock */
 
 let cmd = commands.find((c) => c.topic === 'addons' && c.command === 'docs')
 
 describe('addons:docs', function () {
   beforeEach(() => cli.mockConsole())
+  afterEach(() => nock.cleanAll())
 
   it('opens an addon by name', function () {
     let api = nock('https://api.heroku.com:443')
