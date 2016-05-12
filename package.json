@@ -2,7 +2,7 @@
   "name": "heroku-cli-addons",
   "description": "`heroku addons:*` commands",
   "version": "1.0.0",
-  "author": "Bo Jeanes @bjeanes",
+  "author": "Barak Obama",
   "bugs": {
     "url": "https://github.com/heroku/heroku-cli-addons/issues"
   },
