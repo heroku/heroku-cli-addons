@@ -9,7 +9,13 @@ function parseConfig (args) {
     let key = args.shift()
     if (!key.startsWith('--')) throw new Error(`Unexpected argument ${key}`)
     key = key.replace(/^--/, '')
-    let val = args.shift()
+    let val
+    if (key.includes('=')) {
+      [key, ...val] = key.split('=')
+      val = val.join('=')
+    } else {
+      val = args.shift()
+    }
     if (!val) {
       config[key] = true
     } else if (val.startsWith('--')) {
