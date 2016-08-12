@@ -13,16 +13,17 @@ function parseConfig (args) {
     if (key.includes('=')) {
       [key, ...val] = key.split('=')
       val = val.join('=')
+      config[key] = val
     } else {
       val = args.shift()
-    }
-    if (!val) {
-      config[key] = true
-    } else if (val.startsWith('--')) {
-      config[key] = true
-      args.unshift(val)
-    } else {
-      config[key] = val
+      if (!val) {
+        config[key] = true
+      } else if (val.startsWith('--')) {
+        config[key] = true
+        args.unshift(val)
+      } else {
+        config[key] = val
+      }
     }
   }
   return config
