@@ -38,6 +38,7 @@ function * run (context, heroku) {
   let config = parseConfig(args.slice(1))
 
   let addon
+
   yield cli.action(`Creating ${plan.name} on ${cli.color.app(app)}`, co(function * () {
     addon = yield heroku.post(`/apps/${app}/addons`, {
       body: { config, name, confirm, plan, attachment: {name: as} },
@@ -46,17 +47,32 @@ function * run (context, heroku) {
         'x-heroku-legacy-provider-messages': 'true'
       }
     })
+
     cli.action.done(cli.color.green(util.formatPrice(addon.plan.price)))
   }))
 
-  if (addon.config_vars.length) {
+  if (addon.state === 'provisioned') {
+
+    if (addon.config_vars.length) {
+      let configVars = addon.config_vars.map(c => cli.color.configVar(c)).join(', ')
+      cli.log(`Created ${cli.color.addon(addon.name)} as ${configVars}`)
+    } else {
+      cli.log(`Created ${cli.color.addon(addon.name)}`)
+    }
+
+    if (addon.provision_message) { cli.log(addon.provision_message) }
+    cli.log(`Use ${cli.color.cmd('heroku addons:docs ' + addon.addon_service.name)} to view documentation`)
+
+  } else if (addon.state === 'provisioning') {
+    cli.log(`Provisioning ${cli.color.addon(addon.name)}...`)
+
     let configVars = addon.config_vars.map(c => cli.color.configVar(c)).join(', ')
-    cli.log(`Created ${cli.color.addon(addon.name)} as ${configVars}`)
-  } else {
-    cli.log(`Created ${cli.color.addon(addon.name)}`)
+    cli.log(`${cli.color.app(app)} will have ${configVars} set and restart when complete...`)
+
+    if (addon.provision_message) { cli.log(addon.provision_message) }
+
+    cli.log(`Use ${cli.color.cmd('heroku addons:info')} to check provisioning progress`)
   }
-  if (addon.provision_message) { cli.log(addon.provision_message) }
-  cli.log(`Use ${cli.color.cmd('heroku addons:docs ' + addon.addon_service.name)} to view documentation`)
 }
 
 const cmd = {
@@ -69,7 +85,8 @@ const cmd = {
   flags: [
     {name: 'name', description: 'name for the add-on resource', hasValue: true},
     {name: 'as', description: 'name for the initial add-on attachment', hasValue: true},
-    {name: 'confirm', description: 'overwrite existing config vars or existing add-on attachments', hasValue: true}
+    {name: 'confirm', description: 'overwrite existing config vars or existing add-on attachments', hasValue: true},
+    {name: 'wait', description: 'watch add-on provision status and exit when complete'}
   ],
   run: cli.command({preauth: true}, co.wrap(run))
 }

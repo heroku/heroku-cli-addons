@@ -58,7 +58,36 @@ Use heroku addons:docs heroku-db3 to view documentation
         flags: {as: 'mydb'}
       })
     })
-  })
+  }),
+
+  context('when add-on is async', () => {
+    beforeEach(() => {
+      let asyncAddon = JSON.parse(JSON.stringify(addon));
+
+      asyncAddon.state = 'provisioning';
+      asyncAddon.provision_message = undefined;
+
+      api.post('/apps/myapp/addons', {
+        attachment: {name: 'mydb'},
+        config: {},
+        plan: {name: 'heroku-postgresql:standard-0'}
+      })
+      .reply(200, asyncAddon)
+    })
+
+    it('creates an add-on with output about async provisioning', () => {
+      return cmd.run({
+        app: 'myapp',
+        args: ['heroku-postgresql:standard-0'],
+        flags: {as: 'mydb'}
+      })
+        .then(() => expect(cli.stderr, 'to equal', 'Creating heroku-postgresql:standard-0 on myapp... $100/month\n'))
+        .then(() => expect(cli.stdout, 'to equal', `Provisioning db3-swiftly-123...
+myapp will have DATABASE_URL set and restart when complete...
+Use heroku addons:info to check provisioning progress
+`))
+    })
+  }),
 
   context('--follow=--otherdb', () => {
     beforeEach(() => {
