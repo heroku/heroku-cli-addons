@@ -7,7 +7,7 @@ function parseConfig (args) {
   let config = {}
   while (args.length > 0) {
     let key = args.shift()
-    if (!key.startsWith('--')) throw new Error(`Unexpected argument ${key}`)
+    if (!key.startsWith('--')) { throw new Error(`Unexpected argument ${key}`) }
     key = key.replace(/^--/, '')
     let val
     if (key.includes('=')) {
@@ -48,13 +48,14 @@ function * run (context, heroku) {
     })
     cli.action.done(cli.color.green(util.formatPrice(addon.plan.price)))
   }))
+
   if (addon.config_vars.length) {
     let configVars = addon.config_vars.map(c => cli.color.configVar(c)).join(', ')
     cli.log(`Created ${cli.color.addon(addon.name)} as ${configVars}`)
   } else {
     cli.log(`Created ${cli.color.addon(addon.name)}`)
   }
-  if (addon.provision_message) cli.log(addon.provision_message)
+  if (addon.provision_message) { cli.log(addon.provision_message) }
   cli.log(`Use ${cli.color.cmd('heroku addons:docs ' + addon.addon_service.name)} to view documentation`)
 }
 
