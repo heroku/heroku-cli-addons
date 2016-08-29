@@ -2,6 +2,7 @@
 
 const cli = require('heroku-cli-util')
 const co = require('co')
+let waitForAddonProvisioning = require('../../lib/addons_wait')
 
 function parseConfig (args) {
   let config = {}
@@ -64,12 +65,18 @@ function * run (context, heroku) {
   } else if (addon.state === 'provisioning') {
     cli.log(`Provisioning ${cli.color.addon(addon.name)}...`)
 
+    if (context.flags.wait) {
+      yield waitForAddonProvisioning(context, heroku, addon, 5)
+    }
+
     let configVars = addon.config_vars.map(c => cli.color.configVar(c)).join(', ')
     cli.log(`${cli.color.app(app)} will have ${configVars} set and restart when complete...`)
 
     if (addon.provision_message) { cli.log(addon.provision_message) }
 
-    cli.log(`Use ${cli.color.cmd('heroku addons:info')} to check provisioning progress`)
+    if (!context.flags.wait) {
+      cli.log(`Use ${cli.color.cmd('heroku addons:info')} to check provisioning progress`)
+    }
   }
 }
 

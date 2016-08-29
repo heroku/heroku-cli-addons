@@ -58,7 +58,7 @@ Use heroku addons:docs heroku-db3 to view documentation
         flags: {as: 'mydb'}
       })
     })
-  }),
+  })
 
   context('when add-on is async', () => {
     beforeEach(() => {
@@ -87,7 +87,7 @@ myapp will have DATABASE_URL set and restart when complete...
 Use heroku addons:info to check provisioning progress
 `))
     })
-  }),
+  })
 
   context('--follow=--otherdb', () => {
     beforeEach(() => {
