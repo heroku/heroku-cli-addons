@@ -52,7 +52,6 @@ function * run (context, heroku) {
   }))
 
   if (addon.state === 'provisioned') {
-
     if (addon.config_vars.length) {
       let configVars = addon.config_vars.map(c => cli.color.configVar(c)).join(', ')
       cli.log(`Created ${cli.color.addon(addon.name)} as ${configVars}`)
@@ -62,7 +61,6 @@ function * run (context, heroku) {
 
     if (addon.provision_message) { cli.log(addon.provision_message) }
     cli.log(`Use ${cli.color.cmd('heroku addons:docs ' + addon.addon_service.name)} to view documentation`)
-
   } else if (addon.state === 'provisioning') {
     cli.log(`Provisioning ${cli.color.addon(addon.name)}...`)
 
