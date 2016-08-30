@@ -62,10 +62,10 @@ Use heroku addons:docs heroku-db3 to view documentation
 
   context('when add-on is async', () => {
     beforeEach(() => {
-      let asyncAddon = JSON.parse(JSON.stringify(addon));
+      let asyncAddon = JSON.parse(JSON.stringify(addon))
 
-      asyncAddon.state = 'provisioning';
-      asyncAddon.provision_message = undefined;
+      asyncAddon.state = 'provisioning'
+      asyncAddon.provision_message = undefined
 
       api.post('/apps/myapp/addons', {
         attachment: {name: 'mydb'},
