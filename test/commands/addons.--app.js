@@ -241,7 +241,7 @@ The table above shows add-ons and the attachments to the current app (acme-inc-d
   })
 
   it('prints add-on line for attachment when add-on info is missing from API (e.g. no permissions on billing app)', function () {
-    mockAPI('acme-inc-api', [ /* no add-on !*/], [fixtures.attachments['acme-inc-api::WWW_DB']])
+    mockAPI('acme-inc-api', [ /* no add-on ! */], [fixtures.attachments['acme-inc-api::WWW_DB']])
 
     return run('acme-inc-api', function () {
       util.expectOutput(cli.stdout, `
