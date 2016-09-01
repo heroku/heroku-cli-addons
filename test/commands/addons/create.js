@@ -85,6 +85,7 @@ Use heroku addons:docs heroku-db3 to view documentation
         .then(() => expect(cli.stdout, 'to equal', `Provisioning db3-swiftly-123...
 myapp will have DATABASE_URL set and restart when complete...
 Use heroku addons:info to check provisioning progress
+Use heroku addons:docs heroku-db3 to view documentation
 `))
     })
   })

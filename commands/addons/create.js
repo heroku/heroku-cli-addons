@@ -62,7 +62,6 @@ function * run (context, heroku) {
     }
 
     if (addon.provision_message) { cli.log(addon.provision_message) }
-    cli.log(`Use ${cli.color.cmd('heroku addons:docs ' + addon.addon_service.name)} to view documentation`)
   } else if (addon.state === 'provisioning') {
     cli.log(`Provisioning ${cli.color.addon(addon.name)}...`)
 
@@ -70,12 +69,17 @@ function * run (context, heroku) {
       yield waitForAddonProvisioning(context, heroku, addon, 5)
     }
 
-    cli.log(`${cli.color.app(app)} will have ${configVars} set and restart when complete...`)
+    if (configVars.length) {
+      cli.log(`${cli.color.app(app)} will have ${configVars} set and restart when complete...`)
+    } else {
+      cli.log(`${cli.color.app(app)} will restart when complete...`)
+    }
 
     if (!context.flags.wait) {
       cli.log(`Use ${cli.color.cmd('heroku addons:info')} to check provisioning progress`)
     }
   }
+  cli.log(`Use ${cli.color.cmd('heroku addons:docs ' + addon.addon_service.name)} to view documentation`)
 }
 
 const cmd = {
