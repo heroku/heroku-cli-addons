@@ -3,6 +3,7 @@
 
 const cmd = commands.find(c => c.topic === 'addons' && c.command === 'create')
 const expect = require('unexpected')
+const _ = require('lodash')
 
 describe('addons:create', () => {
   let api
@@ -61,32 +62,93 @@ Use heroku addons:docs heroku-db3 to view documentation
   })
 
   context('when add-on is async', () => {
-    beforeEach(() => {
-      let asyncAddon = JSON.parse(JSON.stringify(addon))
+    context('provisioning message and config vars provided by add-on provider', () => {
+      beforeEach(() => {
+        let asyncAddon = _.clone(addon)
 
-      asyncAddon.state = 'provisioning'
-      asyncAddon.provision_message = undefined
+        asyncAddon.state = 'provisioning'
 
-      api.post('/apps/myapp/addons', {
-        attachment: {name: 'mydb'},
-        config: {},
-        plan: {name: 'heroku-postgresql:standard-0'}
+        api.post('/apps/myapp/addons', {
+          attachment: {name: 'mydb'},
+          config: {},
+          plan: {name: 'heroku-postgresql:standard-0'}
+        })
+        .reply(200, asyncAddon)
       })
-      .reply(200, asyncAddon)
-    })
 
-    it('creates an add-on with output about async provisioning', () => {
-      return cmd.run({
-        app: 'myapp',
-        args: ['heroku-postgresql:standard-0'],
-        flags: {as: 'mydb'}
-      })
-        .then(() => expect(cli.stderr, 'to equal', 'Creating heroku-postgresql:standard-0 on myapp... $100/month\n'))
-        .then(() => expect(cli.stdout, 'to equal', `Provisioning db3-swiftly-123...
+      it('creates an add-on with output about async provisioning', () => {
+        return cmd.run({
+          app: 'myapp',
+          args: ['heroku-postgresql:standard-0'],
+          flags: {as: 'mydb'}
+        })
+          .then(() => expect(cli.stderr, 'to equal', 'Creating heroku-postgresql:standard-0 on myapp... $100/month\n'))
+          .then(() => expect(cli.stdout, 'to equal', `Provisioning db3-swiftly-123...
+provision message
 myapp will have DATABASE_URL set and restart when complete...
 Use heroku addons:info to check provisioning progress
 Use heroku addons:docs heroku-db3 to view documentation
 `))
+      })
+    })
+    context('and no provision message supplied', () => {
+      beforeEach(() => {
+        let asyncAddon = _.clone(addon)
+
+        asyncAddon.state = 'provisioning'
+        asyncAddon.provision_message = undefined
+
+        api.post('/apps/myapp/addons', {
+          attachment: {name: 'mydb'},
+          config: {},
+          plan: {name: 'heroku-postgresql:standard-0'}
+        })
+        .reply(200, asyncAddon)
+      })
+
+      it('creates an add-on with output about async provisioning', () => {
+        return cmd.run({
+          app: 'myapp',
+          args: ['heroku-postgresql:standard-0'],
+          flags: {as: 'mydb'}
+        })
+          .then(() => expect(cli.stderr, 'to equal', 'Creating heroku-postgresql:standard-0 on myapp... $100/month\n'))
+          .then(() => expect(cli.stdout, 'to equal', `Provisioning db3-swiftly-123...
+myapp will have DATABASE_URL set and restart when complete...
+Use heroku addons:info to check provisioning progress
+Use heroku addons:docs heroku-db3 to view documentation
+`))
+      })
+    })
+    context('and no config vars supplied by add-on provider', () => {
+      beforeEach(() => {
+        let asyncAddon = _.clone(addon)
+
+        asyncAddon.state = 'provisioning'
+        asyncAddon.config_vars = undefined
+
+        api.post('/apps/myapp/addons', {
+          attachment: {name: 'mydb'},
+          config: {},
+          plan: {name: 'heroku-postgresql:standard-0'}
+        })
+        .reply(200, asyncAddon)
+      })
+
+      it('creates an add-on with output about async provisioning', () => {
+        return cmd.run({
+          app: 'myapp',
+          args: ['heroku-postgresql:standard-0'],
+          flags: {as: 'mydb'}
+        })
+          .then(() => expect(cli.stderr, 'to equal', 'Creating heroku-postgresql:standard-0 on myapp... $100/month\n'))
+          .then(() => expect(cli.stdout, 'to equal', `Provisioning db3-swiftly-123...
+provision message
+myapp will restart when complete...
+Use heroku addons:info to check provisioning progress
+Use heroku addons:docs heroku-db3 to view documentation
+`))
+      })
     })
   })
 
@@ -106,6 +168,32 @@ Use heroku addons:docs heroku-db3 to view documentation
         args: ['heroku-postgresql:standard-0', '--rollback', '--follow=--otherdb', '--foo'],
         flags: {as: 'mydb'}
       })
+    })
+  })
+  context('no config vars supplied by add-on provider', () => {
+    beforeEach(() => {
+      let noConfigAddon = _.clone(addon)
+      noConfigAddon.config_vars = undefined
+
+      api.post('/apps/myapp/addons', {
+        attachment: {name: 'mydb'},
+        config: {},
+        plan: {name: 'heroku-postgresql:standard-0'}
+      })
+      .reply(200, noConfigAddon)
+    })
+
+    it('creates an add-on without the config vars listed', () => {
+      return cmd.run({
+        app: 'myapp',
+        args: ['heroku-postgresql:standard-0'],
+        flags: {as: 'mydb'}
+      })
+        .then(() => expect(cli.stderr, 'to equal', 'Creating heroku-postgresql:standard-0 on myapp... $100/month\n'))
+        .then(() => expect(cli.stdout, 'to equal', `Created db3-swiftly-123
+provision message
+Use heroku addons:docs heroku-db3 to view documentation
+`))
     })
   })
 })

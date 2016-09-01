@@ -52,6 +52,7 @@ function * run (context, heroku) {
     cli.action.done(cli.color.green(util.formatPrice(addon.plan.price)))
   }))
 
+  if (!addon.config_vars || !addon.config_vars.length) { addon.config_vars = [] }
   let configVars = addon.config_vars.map(c => cli.color.configVar(c)).join(', ')
 
   if (addon.state === 'provisioned') {
@@ -64,6 +65,8 @@ function * run (context, heroku) {
     if (addon.provision_message) { cli.log(addon.provision_message) }
   } else if (addon.state === 'provisioning') {
     cli.log(`Provisioning ${cli.color.addon(addon.name)}...`)
+
+    if (addon.provision_message) { cli.log(addon.provision_message) }
 
     if (context.flags.wait) {
       yield waitForAddonProvisioning(context, heroku, addon, 5)
