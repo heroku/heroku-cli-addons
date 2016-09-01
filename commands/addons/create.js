@@ -64,13 +64,13 @@ function * run (context, heroku) {
 
     if (addon.provision_message) { cli.log(addon.provision_message) }
   } else if (addon.state === 'provisioning') {
-    cli.log(`Provisioning ${cli.color.addon(addon.name)}...`)
-
-    if (addon.provision_message) { cli.log(addon.provision_message) }
-
     if (context.flags.wait) {
       yield waitForAddonProvisioning(context, heroku, addon, 5)
+    } else {
+      cli.log(`Provisioning ${cli.color.addon(addon.name)}...`)
     }
+
+    if (addon.provision_message) { cli.log(addon.provision_message) }
 
     if (configVars.length) {
       cli.log(`${cli.color.app(app)} will have ${configVars} set and restart when complete...`)

@@ -3,6 +3,7 @@
 
 const cmd = commands.find(c => c.topic === 'addons' && c.command === 'create')
 const expect = require('unexpected')
+const lolex = require('lolex')
 const _ = require('lodash')
 
 describe('addons:create', () => {
@@ -146,6 +147,53 @@ Use heroku addons:docs heroku-db3 to view documentation
 provision message
 myapp will restart when complete...
 Use heroku addons:info to check provisioning progress
+Use heroku addons:docs heroku-db3 to view documentation
+`))
+      })
+    })
+    context('--wait', () => {
+      let clock
+      let post
+      let provisioningResponse
+      let provisionedResponse
+
+      beforeEach(() => {
+        let asyncAddon = _.clone(addon)
+        asyncAddon.state = 'provisioning'
+
+        post = api.post('/apps/myapp/addons', {
+          attachment: {name: 'mydb'},
+          config: {wait: true},
+          plan: {name: 'heroku-postgresql:standard-0'}
+        })
+        .reply(200, asyncAddon)
+
+        provisioningResponse = api.get('/apps/myapp/addons/db3-swiftly-123')
+          .reply(200, asyncAddon)
+
+        provisionedResponse = api.get('/apps/myapp/addons/db3-swiftly-123')
+          .reply(200, addon) // when it has provisioned
+
+        clock = lolex.install()
+        clock.setTimeout = function (fn, timeout) { fn() }
+      })
+
+      afterEach(function () {
+        clock.uninstall()
+      })
+
+      it('waits for response', () => {
+        return cmd.run({
+          app: 'myapp',
+          args: ['heroku-postgresql:standard-0', '--wait'],
+          flags: {as: 'mydb', wait: true}
+        })
+          .then(() => post.done())
+          .then(() => provisioningResponse.done())
+          .then(() => provisionedResponse.done())
+          .then(() => expect(cli.stderr, 'to equal', 'Creating heroku-postgresql:standard-0 on myapp... $100/month\nProvisioning db3-swiftly-123... done\n'))
+          .then(() => expect(cli.stdout, 'to equal', `provision message
+myapp will have DATABASE_URL set and restart when complete...
 Use heroku addons:docs heroku-db3 to view documentation
 `))
       })
