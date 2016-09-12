@@ -34,6 +34,11 @@ function printDocsHelp (addon) {
   return cli.log(`Use ${cli.color.cmd('heroku addons:docs ' + addon.addon_service.name)} to view documentation`)
 }
 
+function formatConfigVars (configVars) {
+  if (!configVars || !configVars.length) { configVars = [] }
+  return configVars.map(c => cli.color.configVar(c)).join(', ')
+}
+
 function * run (context, heroku) {
   const util = require('../../lib/util')
 
@@ -43,6 +48,8 @@ function * run (context, heroku) {
   let config = parseConfig(args.slice(1))
 
   let addon
+
+  let configVars
 
   yield cli.action(`Creating ${plan.name} on ${cli.color.app(app)}`, co(function * () {
     addon = yield heroku.post(`/apps/${app}/addons`, {
@@ -56,29 +63,27 @@ function * run (context, heroku) {
     cli.action.done(cli.color.green(util.formatPrice(addon.plan.price)))
   }))
 
-  if (!addon.config_vars || !addon.config_vars.length) { addon.config_vars = [] }
-  let configVars = addon.config_vars.map(c => cli.color.configVar(c)).join(', ')
+  if (addon.provision_message) { cli.log(addon.provision_message) }
 
   switch (addon.state) {
     case 'provisioned':
+      configVars = formatConfigVars(addon.config_vars)
       if (configVars.length) {
         cli.log(`Created ${cli.color.addon(addon.name)} as ${configVars}`)
       } else {
         cli.log(`Created ${cli.color.addon(addon.name)}`)
       }
 
-      if (addon.provision_message) { cli.log(addon.provision_message) }
       printDocsHelp(addon)
       break
     case 'provisioning':
       if (context.flags.wait) {
-        yield waitForAddonProvisioning(context, heroku, addon, 5)
+        addon = yield waitForAddonProvisioning(context, heroku, addon, 5)
       } else {
         cli.log(`Creating ${cli.color.addon(addon.name)}...`)
       }
 
-      if (addon.provision_message) { cli.log(addon.provision_message) }
-
+      configVars = formatConfigVars(addon.config_vars)
       if (configVars.length) {
         cli.log(`${cli.color.app(app)} will have ${configVars} set and restart when complete...`)
       } else {
