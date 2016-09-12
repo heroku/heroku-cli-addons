@@ -197,6 +197,26 @@ Use heroku addons:docs heroku-db3 to view documentation
 `))
       })
     })
+    context('when add-on provision errors', () => {
+      it('shows that it failed to provision', function () {
+        let deprovisionedAddon = _.clone(addon)
+        deprovisionedAddon.state = 'deprovisioned'
+
+        api.post('/apps/myapp/addons', {
+          attachment: {name: 'mydb'},
+          plan: {name: 'heroku-postgresql:standard-0'}
+        })
+        .reply(200, deprovisionedAddon) // failed
+
+        let cmdPromise = cmd.run({
+          app: 'myapp',
+          args: ['heroku-postgresql:standard-0'],
+          flags: {as: 'mydb'}
+        })
+
+        expect(cmdPromise, 'to be rejected with', 'The add-on was unable to be created, with status deprovisioned')
+      })
+    })
   })
 
   context('--follow=--otherdb', () => {
