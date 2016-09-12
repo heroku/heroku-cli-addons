@@ -61,7 +61,7 @@ describe('addons:wait', function () {
           .then(() => provisioningResponse.done())
           .then(() => provisionedResponse.done())
           .then(() => expect(cli.stdout).to.equal(''))
-          .then(() => expect(cli.stderr).to.equal('Provisioning www-redis... done\n'))
+          .then(() => expect(cli.stderr).to.equal('Creating www-redis... done\n'))
       })
     })
     context('when add-on transitions to deprovisioned state', () => {

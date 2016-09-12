@@ -74,7 +74,7 @@ function * run (context, heroku) {
       if (context.flags.wait) {
         yield waitForAddonProvisioning(context, heroku, addon, 5)
       } else {
-        cli.log(`Provisioning ${cli.color.addon(addon.name)}...`)
+        cli.log(`Creating ${cli.color.addon(addon.name)}...`)
       }
 
       if (addon.provision_message) { cli.log(addon.provision_message) }
@@ -86,7 +86,7 @@ function * run (context, heroku) {
       }
 
       if (!context.flags.wait) {
-        cli.log(`Use ${cli.color.cmd('heroku addons:info ' + addon.name)} to check provisioning progress`)
+        cli.log(`Use ${cli.color.cmd('heroku addons:info ' + addon.name)} to check creation progress`)
       }
       printDocsHelp(addon)
       break
@@ -106,7 +106,7 @@ const cmd = {
     {name: 'name', description: 'name for the add-on resource', hasValue: true},
     {name: 'as', description: 'name for the initial add-on attachment', hasValue: true},
     {name: 'confirm', description: 'overwrite existing config vars or existing add-on attachments', hasValue: true},
-    {name: 'wait', description: 'watch add-on provision status and exit when complete'}
+    {name: 'wait', description: 'watch add-on creation status and exit when complete'}
   ],
   run: cli.command({preauth: true}, co.wrap(run))
 }
