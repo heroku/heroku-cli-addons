@@ -86,7 +86,7 @@ function * run (context, heroku) {
       }
 
       if (!context.flags.wait) {
-        cli.log(`Use ${cli.color.cmd('heroku addons:info')} to check provisioning progress`)
+        cli.log(`Use ${cli.color.cmd('heroku addons:info ' + addon.name)} to check provisioning progress`)
       }
       printDocsHelp(addon)
       break

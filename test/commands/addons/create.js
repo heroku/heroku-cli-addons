@@ -86,7 +86,7 @@ Use heroku addons:docs heroku-db3 to view documentation
           .then(() => expect(cli.stdout, 'to equal', `Provisioning db3-swiftly-123...
 provision message
 myapp will have DATABASE_URL set and restart when complete...
-Use heroku addons:info to check provisioning progress
+Use heroku addons:info db3-swiftly-123 to check provisioning progress
 Use heroku addons:docs heroku-db3 to view documentation
 `))
       })
@@ -115,7 +115,7 @@ Use heroku addons:docs heroku-db3 to view documentation
           .then(() => expect(cli.stderr, 'to equal', 'Creating heroku-postgresql:standard-0 on myapp... $100/month\n'))
           .then(() => expect(cli.stdout, 'to equal', `Provisioning db3-swiftly-123...
 myapp will have DATABASE_URL set and restart when complete...
-Use heroku addons:info to check provisioning progress
+Use heroku addons:info db3-swiftly-123 to check provisioning progress
 Use heroku addons:docs heroku-db3 to view documentation
 `))
       })
@@ -145,7 +145,7 @@ Use heroku addons:docs heroku-db3 to view documentation
           .then(() => expect(cli.stdout, 'to equal', `Provisioning db3-swiftly-123...
 provision message
 myapp will restart when complete...
-Use heroku addons:info to check provisioning progress
+Use heroku addons:info db3-swiftly-123 to check provisioning progress
 Use heroku addons:docs heroku-db3 to view documentation
 `))
       })
