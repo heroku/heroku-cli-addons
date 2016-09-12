@@ -9,6 +9,7 @@ let _ = require('lodash')
 const lolex = require('lolex')
 
 let clock
+const expansionHeaders = {'Accept-Expansion': 'addon_service,plan'}
 
 describe('addons:wait', function () {
   beforeEach(function () {
@@ -26,7 +27,7 @@ describe('addons:wait', function () {
   context('waiting for an individual add-on', function () {
     context('when the add-on is provisioned', function () {
       beforeEach(function () {
-        nock('https://api.heroku.com', {reqheaders: {'Accept-Expansion': 'addon_service,plan'}})
+        nock('https://api.heroku.com', {reqheaders: expansionHeaders})
           .get('/apps/example/addons/www-db')
           .reply(200, fixtures.addons['www-db']) // provisioned
       })
@@ -39,7 +40,6 @@ describe('addons:wait', function () {
     })
     context('for an add-on that is still provisioning', function () {
       it('waits until the add-on is provisioned, then shows config vars', function () {
-        const expansionHeaders = {'Accept-Expansion': 'addon_service,plan'}
         // Call to resolve the add-on:
         let resolverResponse = nock('https://api.heroku.com')
           .get('/addons/www-redis')
@@ -64,16 +64,29 @@ describe('addons:wait', function () {
           .then(() => expect(cli.stderr).to.equal('Provisioning www-redis... done\n'))
       })
     })
-    // it('shows that it failed to provision', function () {
-    // return cmd.run({flags: {}, args: {addon: 'www-redis'}}).then(function () {
-    // util.expectOutput(cli.stderr, 'error')
-    // })
-    // })
-    // })
-    // })
-    context('when app is provided and multiple add-ons on app', function () {
-      context('including add-ons still provisioning', function () {
+    context('when add-on transitions to deprovisioned state', () => {
+      it('shows that it failed to provision', function () {
+        nock('https://api.heroku.com')
+          .get('/addons/www-redis')
+          .reply(200, fixtures.addons['www-redis']) // provisioning has started
+
+        let deprovisionedAddon = _.clone(fixtures.addons['www-redis'])
+        deprovisionedAddon.state = 'deprovisioned'
+
+        nock('https://api.heroku.com', {reqheaders: expansionHeaders})
+          .get('/apps/acme-inc-www/addons/www-redis')
+          .reply(200, deprovisionedAddon)
+
+        let cmdPromise = cmd.run({flags: {}, args: {addon: 'www-redis'}})
+
+        expect(cmdPromise, 'to be rejected with', 'The add-on was unable to be created, with status deprovisioned')
       })
     })
+
+    // context('when app is provided and multiple add-ons on app', function () {
+    //   context('including add-ons still provisioning', function () {
+    //
+    //   })
+    // })
   })
 })

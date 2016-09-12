@@ -61,7 +61,6 @@ Use heroku addons:docs heroku-db3 to view documentation
       })
     })
   })
-
   context('when add-on is async', () => {
     context('provisioning message and config vars provided by add-on provider', () => {
       beforeEach(() => {
