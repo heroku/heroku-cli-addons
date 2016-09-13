@@ -71,7 +71,7 @@ function * run (context, heroku) {
       addon = yield waitForAddonProvisioning(context, heroku, addon, 5)
       cli.log(formatConfigVarsMessage(addon))
     } else {
-      cli.log(`${cli.color.addon(addon.name)} is being created in the background and will restart when complete...`)
+      cli.log(`${cli.color.addon(addon.name)} is being created in the background. The app will restart when complete...`)
       cli.log(`Use ${cli.color.cmd('heroku addons:info ' + addon.name)} to check creation progress`)
     }
   } else if (addon.state === 'deprovisioned') {
