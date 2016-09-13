@@ -11,7 +11,13 @@ function * run (ctx, api) {
   let interval = parseInt(ctx.flags['wait-interval'])
   if (!interval || interval < 0) { interval = 5 }
 
-  yield waitForAddonProvisioning(ctx, api, addon, interval)
+  addon = yield waitForAddonProvisioning(ctx, api, addon, interval)
+
+  let configVars = (addon.config_vars || [])
+  if (configVars.length > 0) {
+    configVars = configVars.map(c => cli.color.configVar(c)).join(', ')
+    cli.log(`Created ${cli.color.addon(addon.name)} as ${configVars}`)
+  }
 }
 
 let topic = 'addons'

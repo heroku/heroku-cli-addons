@@ -51,6 +51,7 @@ describe('addons:wait', function () {
 
         let provisionedAddon = _.clone(fixtures.addons['www-redis'])
         provisionedAddon.state = 'provisioned'
+        provisionedAddon.config_vars = ['REDIS_URL']
 
         let provisionedResponse = nock('https://api.heroku.com', {reqheaders: expansionHeaders})
           .get('/apps/acme-inc-www/addons/www-redis')
@@ -60,8 +61,8 @@ describe('addons:wait', function () {
           .then(() => resolverResponse.done())
           .then(() => provisioningResponse.done())
           .then(() => provisionedResponse.done())
-          .then(() => expect(cli.stdout).to.equal(''))
           .then(() => expect(cli.stderr).to.equal('Creating www-redis... done\n'))
+          .then(() => expect(cli.stdout).to.equal('Created www-redis as REDIS_URL\n'))
       })
     })
     context('when add-on transitions to deprovisioned state', () => {

@@ -84,8 +84,7 @@ Use heroku addons:docs heroku-db3 to view documentation
         })
           .then(() => expect(cli.stderr, 'to equal', 'Creating heroku-postgresql:standard-0 on myapp... $100/month\n'))
           .then(() => expect(cli.stdout, 'to equal', `provision message
-Creating db3-swiftly-123...
-myapp will have DATABASE_URL set and restart when complete...
+db3-swiftly-123 is being created in the background and will restart when complete...
 Use heroku addons:info db3-swiftly-123 to check creation progress
 Use heroku addons:docs heroku-db3 to view documentation
 `))
@@ -113,8 +112,7 @@ Use heroku addons:docs heroku-db3 to view documentation
           flags: {as: 'mydb'}
         })
           .then(() => expect(cli.stderr, 'to equal', 'Creating heroku-postgresql:standard-0 on myapp... $100/month\n'))
-          .then(() => expect(cli.stdout, 'to equal', `Creating db3-swiftly-123...
-myapp will have DATABASE_URL set and restart when complete...
+          .then(() => expect(cli.stdout, 'to equal', `db3-swiftly-123 is being created in the background and will restart when complete...
 Use heroku addons:info db3-swiftly-123 to check creation progress
 Use heroku addons:docs heroku-db3 to view documentation
 `))
@@ -143,8 +141,7 @@ Use heroku addons:docs heroku-db3 to view documentation
         })
           .then(() => expect(cli.stderr, 'to equal', 'Creating heroku-postgresql:standard-0 on myapp... $100/month\n'))
           .then(() => expect(cli.stdout, 'to equal', `provision message
-Creating db3-swiftly-123...
-myapp will restart when complete...
+db3-swiftly-123 is being created in the background and will restart when complete...
 Use heroku addons:info db3-swiftly-123 to check creation progress
 Use heroku addons:docs heroku-db3 to view documentation
 `))
@@ -192,7 +189,8 @@ Use heroku addons:docs heroku-db3 to view documentation
           .then(() => provisionedResponse.done())
           .then(() => expect(cli.stderr, 'to equal', 'Creating heroku-postgresql:standard-0 on myapp... $100/month\nCreating db3-swiftly-123... done\n'))
           .then(() => expect(cli.stdout, 'to equal', `provision message
-myapp will have DATABASE_URL set and restart when complete...
+Waiting for db3-swiftly-123...
+Created db3-swiftly-123 as DATABASE_URL
 Use heroku addons:docs heroku-db3 to view documentation
 `))
       })

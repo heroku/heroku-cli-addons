@@ -30,13 +30,15 @@ function parseConfig (args) {
   return config
 }
 
-function printDocsHelp (addon) {
-  return cli.log(`Use ${cli.color.cmd('heroku addons:docs ' + addon.addon_service.name)} to view documentation`)
-}
+function formatConfigVarsMessage (addon) {
+  let configVars = (addon.config_vars || [])
 
-function formatConfigVars (configVars) {
-  if (!configVars || !configVars.length) { configVars = [] }
-  return configVars.map(c => cli.color.configVar(c)).join(', ')
+  if (configVars.length > 0) {
+    configVars = configVars.map(c => cli.color.configVar(c)).join(', ')
+    return `Created ${cli.color.addon(addon.name)} as ${configVars}`
+  } else {
+    return `Created ${cli.color.addon(addon.name)}`
+  }
 }
 
 function * run (context, heroku) {
@@ -48,8 +50,6 @@ function * run (context, heroku) {
   let config = parseConfig(args.slice(1))
 
   let addon
-
-  let configVars
 
   yield cli.action(`Creating ${plan.name} on ${cli.color.app(app)}`, co(function * () {
     addon = yield heroku.post(`/apps/${app}/addons`, {
@@ -65,39 +65,22 @@ function * run (context, heroku) {
 
   if (addon.provision_message) { cli.log(addon.provision_message) }
 
-  switch (addon.state) {
-    case 'provisioned':
-      configVars = formatConfigVars(addon.config_vars)
-      if (configVars.length) {
-        cli.log(`Created ${cli.color.addon(addon.name)} as ${configVars}`)
-      } else {
-        cli.log(`Created ${cli.color.addon(addon.name)}`)
-      }
-
-      printDocsHelp(addon)
-      break
-    case 'provisioning':
-      if (context.flags.wait) {
-        addon = yield waitForAddonProvisioning(context, heroku, addon, 5)
-      } else {
-        cli.log(`Creating ${cli.color.addon(addon.name)}...`)
-      }
-
-      configVars = formatConfigVars(addon.config_vars)
-      if (configVars.length) {
-        cli.log(`${cli.color.app(app)} will have ${configVars} set and restart when complete...`)
-      } else {
-        cli.log(`${cli.color.app(app)} will restart when complete...`)
-      }
-
-      if (!context.flags.wait) {
-        cli.log(`Use ${cli.color.cmd('heroku addons:info ' + addon.name)} to check creation progress`)
-      }
-      printDocsHelp(addon)
-      break
-    case 'deprovisioned':
-      throw new Error(`The add-on was unable to be created, with status ${addon.state}`)
+  if (addon.state === 'provisioning') {
+    if (context.flags.wait) {
+      cli.log(`Waiting for ${cli.color.addon(addon.name)}...`)
+      addon = yield waitForAddonProvisioning(context, heroku, addon, 5)
+      cli.log(formatConfigVarsMessage(addon))
+    } else {
+      cli.log(`${addon.name} is being created in the background and will restart when complete...`)
+      cli.log(`Use ${cli.color.cmd('heroku addons:info ' + addon.name)} to check creation progress`)
+    }
+  } else if (addon.state === 'deprovisioned') {
+    throw new Error(`The add-on was unable to be created, with status ${addon.state}`)
+  } else {
+    cli.log(formatConfigVarsMessage(addon))
   }
+
+  cli.log(`Use ${cli.color.cmd('heroku addons:docs ' + addon.addon_service.name)} to view documentation`)
 }
 
 const cmd = {
