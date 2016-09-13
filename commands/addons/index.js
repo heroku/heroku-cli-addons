@@ -124,8 +124,8 @@ function * run (ctx, api) {
       }, {
         key: 'state',
         label: 'State',
-        format: function(state) {
-          switch(state) {
+        format: function (state) {
+          switch (state) {
             case 'provisioned':
               state = 'created'
               break
@@ -223,8 +223,8 @@ function * run (ctx, api) {
       }, {
         label: 'State',
         key: 'state',
-        format: function(state) {
-          switch(state) {
+        format: function (state) {
+          switch (state) {
             case 'provisioned':
               state = 'created'
               break
