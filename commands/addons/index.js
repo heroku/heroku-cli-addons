@@ -8,6 +8,7 @@ function * run (ctx, api) {
   const table = util.table
   const style = util.style
   const formatPrice = util.formatPrice
+  const formatState = util.formatState
   const printf = require('printf')
 
   const groupBy = require('lodash.groupby')
@@ -223,22 +224,7 @@ function * run (ctx, api) {
       }, {
         label: 'State',
         key: 'state',
-        format: function (state) {
-          switch (state) {
-            case 'provisioned':
-              state = 'created'
-              break
-            case 'provisioning':
-              state = 'creating'
-              break
-            case 'deprovisioned':
-              state = 'errored'
-              break
-            default:
-              state = ''
-          }
-          return state
-        }
+        format: formatState
       }],
 
       // Separate each add-on row by a blank line
