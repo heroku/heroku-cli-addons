@@ -84,7 +84,7 @@ Use heroku addons:docs heroku-db3 to view documentation
         })
           .then(() => expect(cli.stderr, 'to equal', 'Creating heroku-postgresql:standard-0 on myapp... $100/month\n'))
           .then(() => expect(cli.stdout, 'to equal', `provision message
-db3-swiftly-123 is being created in the background and will restart when complete...
+db3-swiftly-123 is being created in the background. The app will restart when complete...
 Use heroku addons:info db3-swiftly-123 to check creation progress
 Use heroku addons:docs heroku-db3 to view documentation
 `))
@@ -112,7 +112,7 @@ Use heroku addons:docs heroku-db3 to view documentation
           flags: {as: 'mydb'}
         })
           .then(() => expect(cli.stderr, 'to equal', 'Creating heroku-postgresql:standard-0 on myapp... $100/month\n'))
-          .then(() => expect(cli.stdout, 'to equal', `db3-swiftly-123 is being created in the background and will restart when complete...
+          .then(() => expect(cli.stdout, 'to equal', `db3-swiftly-123 is being created in the background. The app will restart when complete...
 Use heroku addons:info db3-swiftly-123 to check creation progress
 Use heroku addons:docs heroku-db3 to view documentation
 `))
@@ -141,7 +141,7 @@ Use heroku addons:docs heroku-db3 to view documentation
         })
           .then(() => expect(cli.stderr, 'to equal', 'Creating heroku-postgresql:standard-0 on myapp... $100/month\n'))
           .then(() => expect(cli.stdout, 'to equal', `provision message
-db3-swiftly-123 is being created in the background and will restart when complete...
+db3-swiftly-123 is being created in the background. The app will restart when complete...
 Use heroku addons:info db3-swiftly-123 to check creation progress
 Use heroku addons:docs heroku-db3 to view documentation
 `))
