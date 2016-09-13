@@ -123,7 +123,20 @@ function * run (ctx, api) {
         }
       }, {
         key: 'state',
-        label: 'State'
+        label: 'State',
+        format: function(state) {
+          switch(state) {
+            case 'provisioned':
+              state = 'created'
+              break
+            case 'provisioning':
+              state = 'creating'
+              break
+            case 'deprovisioned':
+              state = 'errored'
+          }
+          return state
+        }
       }]
     })
   }
@@ -195,7 +208,7 @@ function * run (ctx, api) {
         label: 'Plan',
         key: 'plan.name',
         format: function (name) {
-          if (name === undefined) return style('dim', '?')
+          if (name === undefined) { return style('dim', '?') }
           return name.replace(/^[^:]+:/, '')
         }
       }, {
@@ -209,7 +222,22 @@ function * run (ctx, api) {
         }
       }, {
         label: 'State',
-        key: 'state'
+        key: 'state',
+        format: function(state) {
+          switch(state) {
+            case 'provisioned':
+              state = 'created'
+              break
+            case 'provisioning':
+              state = 'creating'
+              break
+            case 'deprovisioned':
+              state = 'errored'
+            default:
+              state = ''
+          }
+          return state
+        }
       }],
 
       // Separate each add-on row by a blank line
