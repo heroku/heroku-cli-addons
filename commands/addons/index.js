@@ -233,6 +233,7 @@ function * run (ctx, api) {
               break
             case 'deprovisioned':
               state = 'errored'
+              break
             default:
               state = ''
           }
