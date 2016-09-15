@@ -7,7 +7,7 @@ let waitForAddonProvisioning = require('../../lib/addons_wait')
 let formatState = require('../../lib/util').formatState
 
 let console = cli.console
-let isTtty = !console.mocking() && (process.stderr.isTTY) && !process.env.CI && (process.env.TERM !== 'dumb')
+let isTtty = !console.mocking() && (process.stderr.isTTY) && (process.env.TERM !== 'dumb')
 
 function * waitForOne (ctx, api, addon, interval) {
   addon = yield waitForAddonProvisioning(ctx, api, addon, interval)
