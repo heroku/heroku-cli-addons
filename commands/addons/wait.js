@@ -7,7 +7,7 @@ let waitForAddonProvisioning = require('../../lib/addons_wait')
 let formatState = require('../../lib/util').formatState
 
 let console = cli.console
-let isTtty = !console.mocking() && (process.stderr.isTTY) && (process.env.TERM !== 'dumb')
+let isTTY = !console.mocking() && (process.stderr.isTTY) && (process.env.TERM !== 'dumb')
 
 function * waitForOne (ctx, api, addon, interval) {
   addon = yield waitForAddonProvisioning(ctx, api, addon, interval)
@@ -33,7 +33,7 @@ function * waitForMany (ctx, api, app, interval) {
     while (stillProvisioning) {
       addons = yield api.get(`/apps/${app}/addons`, {headers: {'Accept-Expansion': 'addon_service,plan'}})
 
-      if (isTtty) {
+      if (isTTY) {
         formattedAddons = addons.map((addon) => {
           return `${cli.color.addon(addon.name)} (${addon.plan.name}) ${formatState(addon.state)}`
         }).join('\n')
