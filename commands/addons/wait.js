@@ -19,11 +19,7 @@ function * waitForOne (ctx, api, addon, interval) {
   }
 }
 
-function anyProvisioning (addons) {
-  return addons.some((addon) => {
-    return (addon.state === 'provisioning')
-  })
-}
+const anyProvisioning = addons => addons.some(addon => addon.state === 'provisioning')
 
 function * waitForMany (ctx, api, app, interval) {
   yield cli.action(`Waiting for add-ons to be created on ${cli.color.app(app)}`, co(function * () {
