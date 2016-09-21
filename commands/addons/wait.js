@@ -67,7 +67,7 @@ module.exports = {
   needsAuth: true,
   args: [{name: 'addon', optional: true}],
   flags: [
-    {name: 'wait-interval', char: 'i', description: 'how frequently to poll in seconds', hasValue: true}
+    {name: 'interval', char: 'i', description: 'how frequently to poll in seconds', hasValue: true}
   ],
   run: cli.command({preauth: true}, co.wrap(run)),
   usage: `${topic}:wait ADDON`,

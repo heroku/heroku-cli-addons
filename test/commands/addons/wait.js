@@ -57,7 +57,7 @@ describe('addons:wait', () => {
           .get('/apps/acme-inc-www/addons/www-redis')
           .reply(200, provisionedAddon)
 
-        return cmd.run({args: {addon: 'www-redis'}, flags: {'wait-interval': '1'}})
+        return cmd.run({args: {addon: 'www-redis'}, flags: {'interval': '1'}})
           .then(() => resolverResponse.done())
           .then(() => provisioningResponse.done())
           .then(() => provisionedResponse.done())
@@ -117,7 +117,7 @@ describe('addons:wait', () => {
             provisionedAddon
           ])
 
-        return cmd.run({args: {}, app: 'myapp', flags: {'wait-interval': '1'}})
+        return cmd.run({args: {}, app: 'myapp', flags: {'interval': '1'}})
           .then(() => inProgressResponse.done())
           .then(() => allDoneResponse.done())
           .then(() => expect(cli.stderr).to.equal(`Waiting for add-ons to be created on myapp... 
