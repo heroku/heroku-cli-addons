@@ -50,20 +50,18 @@ function * run (context, heroku) {
   let config = parseConfig(args.slice(1))
 
   function createAddon (app, config, name, confirm, plan, as) {
-    cli.action.start(`Creating ${plan.name} on ${cli.color.app(app)}`)
-    return heroku.post(`/apps/${app}/addons`, {
-      body: { config, name, confirm, plan, attachment: {name: as} },
-      headers: {
-        'accept-expansion': 'plan',
-        'x-heroku-legacy-provider-messages': 'true'
-      }
-    }).catch(function (err) {
-      cli.action.done(cli.color.red.bold('!'))
-      throw err
-    }).then(function (addon) {
-      cli.action.done(cli.color.green(util.formatPrice(addon.plan.price)))
-      return addon
-    })
+    return cli.action(`Creating ${plan.name} on ${cli.color.app(app)}`,
+      heroku.post(`/apps/${app}/addons`, {
+        body: { config, name, confirm, plan, attachment: {name: as} },
+        headers: {
+          'accept-expansion': 'plan',
+          'x-heroku-legacy-provider-messages': 'true'
+        }
+      }).then(function (addon) {
+        cli.action.done(cli.color.green(util.formatPrice(addon.plan.price)))
+        return addon
+      })
+    )
   }
 
   let addon = yield util.trapConfirmationRequired(context, (confirm) => (createAddon(app, config, name, confirm, plan, as)))
