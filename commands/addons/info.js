@@ -27,8 +27,7 @@ let run = cli.command({preauth: true}, function (ctx, api) {
         ].join('::')
       }).sort(),
       'Owning app': style('app', addon.app.name),
-      'Installed at': (new Date(addon.created_at)).toString(),
-      State: addon.state
+      'Installed at': (new Date(addon.created_at)).toString()
     })
   })
 })
