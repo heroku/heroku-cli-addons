@@ -121,9 +121,6 @@ function * run (ctx, api) {
           if (typeof price === 'undefined') return style('dim', '?')
           return formatPrice(price)
         }
-      }, {
-        key: 'state',
-        label: 'State'
       }]
     })
   }
@@ -207,9 +204,6 @@ function * run (ctx, api) {
             return style('dim', printf('(billed to %s app)', style('app', addon.app.name)))
           }
         }
-      }, {
-        label: 'State',
-        key: 'state'
       }],
 
       // Separate each add-on row by a blank line
