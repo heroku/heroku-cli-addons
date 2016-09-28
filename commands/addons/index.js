@@ -8,7 +8,6 @@ function * run (ctx, api) {
   const table = util.table
   const style = util.style
   const formatPrice = util.formatPrice
-  const formatState = util.formatState
   const printf = require('printf')
 
   const groupBy = require('lodash.groupby')
@@ -124,20 +123,7 @@ function * run (ctx, api) {
         }
       }, {
         key: 'state',
-        label: 'State',
-        format: function (state) {
-          switch (state) {
-            case 'provisioned':
-              state = 'created'
-              break
-            case 'provisioning':
-              state = 'creating'
-              break
-            case 'deprovisioned':
-              state = 'errored'
-          }
-          return state
-        }
+        label: 'State'
       }]
     })
   }
@@ -209,7 +195,7 @@ function * run (ctx, api) {
         label: 'Plan',
         key: 'plan.name',
         format: function (name) {
-          if (name === undefined) { return style('dim', '?') }
+          if (name === undefined) return style('dim', '?')
           return name.replace(/^[^:]+:/, '')
         }
       }, {
@@ -223,8 +209,7 @@ function * run (ctx, api) {
         }
       }, {
         label: 'State',
-        key: 'state',
-        format: formatState
+        key: 'state'
       }],
 
       // Separate each add-on row by a blank line

@@ -51,11 +51,11 @@ describe('addons --app', function () {
       return run('acme-inc-www', function () {
         util.expectOutput(cli.stdout, `
 Add-on                      Plan       Price      State
-──────────────────────────  ─────────  ─────────  ────────
-heroku-postgresql (www-db)  hobby-dev  free       created
+──────────────────────────  ─────────  ─────────  ────────────
+heroku-postgresql (www-db)  hobby-dev  free       provisioned
  └─ as DATABASE
 
-heroku-redis (www-redis)    premium-2  $60/month  creating
+heroku-redis (www-redis)    premium-2  $60/month  provisioning
  └─ as REDIS
 
 The table above shows add-ons and the attachments to the current app (acme-inc-www) or other apps.
@@ -71,8 +71,8 @@ The table above shows add-ons and the attachments to the current app (acme-inc-w
       return run('acme-inc-www', function () {
         util.expectOutput(cli.stdout, `
 Add-on                             Plan       Price  State
-─────────────────────────────────  ─────────  ─────  ───────
-heroku-postgresql (www-db)         hobby-dev  free   created
+─────────────────────────────────  ─────────  ─────  ───────────
+heroku-postgresql (www-db)         hobby-dev  free   provisioned
  ├─ as DATABASE
  └─ as WWW_DB on acme-inc-dwh app
 
@@ -90,8 +90,8 @@ The table above shows add-ons and the attachments to the current app (acme-inc-w
       return run('acme-inc-dwh', function () {
         util.expectOutput(cli.stdout, `
 Add-on                               Plan       Price                         State
-───────────────────────────────────  ─────────  ────────────────────────────  ───────
-heroku-postgresql (www-db)           hobby-dev  (billed to acme-inc-www app)  created
+───────────────────────────────────  ─────────  ────────────────────────────  ───────────
+heroku-postgresql (www-db)           hobby-dev  (billed to acme-inc-www app)  provisioned
  ├─ as WWW_DB
  └─ as DATABASE on acme-inc-www app
 
