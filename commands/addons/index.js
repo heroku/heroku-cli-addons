@@ -130,10 +130,10 @@ function * run (ctx, api) {
           switch (state) {
             case 'provisioned':
               state = 'created'
-            break
+              break
             case 'provisioning':
               state = 'creating'
-            break
+              break
             case 'deprovisioned':
               state = 'errored'
           }
