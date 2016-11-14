@@ -237,4 +237,71 @@ describe('resolve', () => {
         .then(() => appAttachment.done())
     })
   })
+
+  describe('appAddon', () => {
+    it('finds a single matching addon for an app', () => {
+      let api = nock('https://api.heroku.com:443')
+        .post('/actions/addons/resolve', {'app': 'myapp', 'addon': 'myaddon-2'}).reply(200, [{name: 'myaddon-2'}])
+
+      return resolve.appAddon(new Heroku(), 'myapp', 'myaddon-2')
+        .then((addon) => expect(addon, 'to satisfy', {name: 'myaddon-2'}))
+        .then(() => api.done())
+    })
+
+    it('fails if not found', () => {
+      nock('https://api.heroku.com:443')
+        .post('/actions/addons/resolve', {'app': 'myapp', 'addon': 'myaddon-5'}).reply(404)
+
+      return resolve.appAddon(new Heroku(), 'myapp', 'myaddon-5')
+        .then(() => { throw new Error('unreachable') })
+        .catch((err) => expect(err, 'to satisfy', {statusCode: 404}))
+    })
+
+    it('fails if ambiguous', () => {
+      let api = nock('https://api.heroku.com:443')
+        .post('/actions/addons/resolve', {'app': 'myapp', 'addon': 'myaddon-5'})
+        .reply(200, [{'name': 'myaddon-5'}, {'name': 'myaddon-6'}])
+
+      return resolve.appAddon(new Heroku(), 'myapp', 'myaddon-5')
+        .then(() => { throw new Error('unreachable') })
+        .catch(function (err) {
+          api.done()
+          expect(err, 'to satisfy', {message: 'Ambiguous identifier; multiple matching add-ons found: myaddon-5, myaddon-6.'})
+        })
+    })
+  })
+
+  describe('appAttachment', () => {
+    it('finds a single matching attachment for an app', () => {
+      let api = nock('https://api.heroku.com:443')
+        .post('/actions/addon-attachments/resolve', {'app': 'myapp', 'addon_attachment': 'myattachment-1'}).reply(200, [{name: 'myattachment-1'}])
+
+      return resolve.appAttachment(new Heroku(), 'myapp', 'myattachment-1')
+        .then((addon) => expect(addon, 'to satisfy', {name: 'myattachment-1'}))
+        .then(() => api.done())
+    })
+
+    it('fails if not found', () => {
+      let api = nock('https://api.heroku.com:443')
+        .post('/actions/addon-attachments/resolve', {'app': null, 'addon_attachment': 'myattachment'}).reply(404)
+
+      return resolve.appAttachment(new Heroku(), null, 'myattachment')
+        .then(() => { throw new Error('unreachable') })
+        .catch((err) => expect(err, 'to satisfy', {statusCode: 404}))
+        .then(() => api.done())
+    })
+
+    it('fails if ambiguous', () => {
+      let api = nock('https://api.heroku.com:443')
+        .post('/actions/addon-attachments/resolve', {'app': 'myapp', 'addon_attachment': 'myaddon-5'})
+        .reply(200, [{'name': 'myaddon-5'}, {'name': 'myaddon-6'}])
+
+      return resolve.appAttachment(new Heroku(), 'myapp', 'myaddon-5')
+        .then(() => { throw new Error('unreachable') })
+        .catch(function (err) {
+          expect(err, 'to satisfy', {message: 'Ambiguous identifier; multiple matching add-ons found: myaddon-5, myaddon-6.'})
+          api.done()
+        })
+    })
+  })
 })
