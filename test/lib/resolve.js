@@ -214,7 +214,7 @@ describe('resolve', () => {
 
       return resolve.attachment(new Heroku(), 'myapp', 'myattachment-5')
         .then(() => { throw new Error('unreachable') })
-        .catch((err) => expect(err, 'to satisfy', {message: 'Ambiguous identifier; multiple matching addons found: some-random-name-1, some-random-name-2.'}))
+        .catch((err) => expect(err, 'to satisfy', {message: 'Ambiguous identifier; multiple matching add-ons found: some-random-name-1, some-random-name-2.'}))
         .then(() => api.done())
         .then(() => appAddon.done())
         .then(() => appAttachment.done())
