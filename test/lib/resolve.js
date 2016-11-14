@@ -42,6 +42,17 @@ describe('resolve', () => {
         .catch((err) => expect(err, 'to satisfy', {statusCode: 404}))
     })
 
+    it('fails if no addon found with addon-service', () => {
+      const api = nock('https://api.heroku.com:443')
+        .post('/actions/addons/resolve', {'app': 'myapp', 'addon': 'myaddon-3', 'addon_service': 'slowdb'}).reply(404)
+        .post('/actions/addons/resolve', {'app': null, 'addon': 'myaddon-3', 'addon_service': 'slowdb'}).reply(404)
+
+      return resolve.addon(new Heroku(), 'myapp', 'myaddon-3', {'addon_service': 'slowdb'})
+        .then(() => { throw new Error('unreachable') })
+        .catch((err) => expect(err, 'to satisfy', {statusCode: 404}))
+        .then(() => api.done())
+    })
+
     it('fails if errored', () => {
       nock('https://api.heroku.com:443')
         .post('/actions/addons/resolve', {'app': 'myapp', 'addon': 'myaddon-5'}).reply(401)
@@ -62,6 +73,17 @@ describe('resolve', () => {
           api.done()
           expect(err, 'to satisfy', {message: 'Ambiguous identifier; multiple matching add-ons found: myaddon-5, myaddon-6.'})
         })
+    })
+
+    it('fails if no addon found', () => {
+      const api = nock('https://api.heroku.com:443')
+        .post('/actions/addons/resolve', {'app': 'myapp', 'addon': 'myaddon-3', 'addon_service': 'slowdb'}).reply(404)
+        .post('/actions/addons/resolve', {'app': null, 'addon': 'myaddon-3', 'addon_service': 'slowdb'}).reply(404)
+
+      return resolve.addon(new Heroku(), 'myapp', 'myaddon-3', {'addon_service': 'slowdb'})
+        .then(() => { throw new Error('unreachable') })
+        .catch((err) => expect(err, 'to satisfy', {statusCode: 404}))
+        .then(() => { api.done() })
     })
 
     describe('memoization', () => {
@@ -100,6 +122,16 @@ describe('resolve', () => {
               .then(function (diffAppAddon) {
                 expect(diffAppAddon, 'to satisfy', {name: 'myaddon-6'})
                 diffApp.done()
+              })
+          })
+          .then(function () {
+            let diffAddonService = nock('https://api.heroku.com:443')
+              .post('/actions/addons/resolve', {'app': 'fooapp', 'addon': 'myaddon-6', 'addon_service': 'slowdb'}).reply(200, [{name: 'myaddon-6'}])
+
+            return resolve.addon(new Heroku(), 'fooapp', 'myaddon-6', {'addon_service': 'slowdb'})
+              .then(function (diffAddonServiceAddon) {
+                expect(diffAddonServiceAddon, 'to satisfy', {name: 'myaddon-6'})
+                diffAddonService.done()
               })
           })
       })
@@ -188,6 +220,40 @@ describe('resolve', () => {
         .then(() => appAttachment.done())
     })
 
+    it('falls back to searching by addon and addon_service', () => {
+      let api = nock('https://api.heroku.com:443')
+        .post('/actions/addon-attachments/resolve', {'app': 'myapp', 'addon_attachment': 'myattachment-3', 'addon_service': 'slowdb'}).reply(404)
+
+      let appAddon = nock('https://api.heroku.com:443')
+        .post('/actions/addons/resolve', {'app': 'myapp', 'addon': 'myattachment-3', 'addon_service': 'slowdb'}).reply(200, [{id: '1e97e8ba-fd24-48a4-8118-eaf287eb7a0f', name: 'myaddon-3'}])
+
+      let appAttachment = nock('https://api.heroku.com:443')
+        .get('/addons/1e97e8ba-fd24-48a4-8118-eaf287eb7a0f/addon-attachments').reply(200, [{app: {name: 'myapp'}, name: 'some-random-name', addon_service: {name: 'slowdb'}}])
+
+      return resolve.attachment(new Heroku(), 'myapp', 'myattachment-3', {'addon_service': 'slowdb'})
+        .then((addon) => expect(addon, 'to satisfy', {name: 'some-random-name'}))
+        .then(() => api.done())
+        .then(() => appAddon.done())
+        .then(() => appAttachment.done())
+    })
+
+    it('falls back to searching by addon and ignores addon_service if not passed', () => {
+      let api = nock('https://api.heroku.com:443')
+        .post('/actions/addon-attachments/resolve', {'app': 'myapp', 'addon_attachment': 'myattachment-3', 'addon_service': null}).reply(404)
+
+      let appAddon = nock('https://api.heroku.com:443')
+        .post('/actions/addons/resolve', {'app': 'myapp', 'addon': 'myattachment-3', 'addon_service': null}).reply(200, [{id: '1e97e8ba-fd24-48a4-8118-eaf287eb7a0f', name: 'myaddon-3'}])
+
+      let appAttachment = nock('https://api.heroku.com:443')
+        .get('/addons/1e97e8ba-fd24-48a4-8118-eaf287eb7a0f/addon-attachments').reply(200, [{app: {name: 'myapp'}, name: 'some-random-name', addon_service: {name: 'slowdb'}}])
+
+      return resolve.attachment(new Heroku(), 'myapp', 'myattachment-3')
+        .then((addon) => expect(addon, 'to satisfy', {name: 'some-random-name'}))
+        .then(() => api.done())
+        .then(() => appAddon.done())
+        .then(() => appAttachment.done())
+    })
+
     it('throws an error when not found', () => {
       let api = nock('https://api.heroku.com:443')
         .post('/actions/addon-attachments/resolve', {'app': 'myapp', 'addon_attachment': 'myattachment-4'}).reply(404)
@@ -199,6 +265,24 @@ describe('resolve', () => {
         .get('/addons/1e97e8ba-fd24-48a4-8118-eaf287eb7a0f/addon-attachments').reply(200, [{app: {name: 'not-myapp'}, name: 'some-random-name'}])
 
       return resolve.attachment(new Heroku(), 'myapp', 'myattachment-4')
+        .then(() => { throw new Error('unreachable') })
+        .catch((err) => expect(err, 'to satisfy', {message: 'Couldn\'t find that addon.'}))
+        .then(() => api.done())
+        .then(() => appAddon.done())
+        .then(() => appAttachment.done())
+    })
+
+    it('throws an error when not found with addon_service', () => {
+      let api = nock('https://api.heroku.com:443')
+        .post('/actions/addon-attachments/resolve', {'app': 'myapp', 'addon_attachment': 'myattachment-3', 'addon_service': 'slowdb'}).reply(404)
+
+      let appAddon = nock('https://api.heroku.com:443')
+        .post('/actions/addons/resolve', {'app': 'myapp', 'addon': 'myattachment-3', 'addon_service': 'slowdb'}).reply(200, [{id: '1e97e8ba-fd24-48a4-8118-eaf287eb7a0f', name: 'myaddon-3'}])
+
+      let appAttachment = nock('https://api.heroku.com:443')
+        .get('/addons/1e97e8ba-fd24-48a4-8118-eaf287eb7a0f/addon-attachments').reply(200, [{app: {name: 'myapp'}, name: 'some-random-name', addon_service: {name: 'not-slowdb'}}])
+
+      return resolve.attachment(new Heroku(), 'myapp', 'myattachment-3', {'addon_service': 'slowdb'})
         .then(() => { throw new Error('unreachable') })
         .catch((err) => expect(err, 'to satisfy', {message: 'Couldn\'t find that addon.'}))
         .then(() => api.done())
