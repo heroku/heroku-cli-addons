@@ -67,11 +67,7 @@ function * run (ctx, api) {
 
   let attachment = yield resolve.attachment(api, ctx.app, ctx.args.addon)
   .catch(function (err) {
-    if (err.statusCode === 404) {
-      return null
-    } else {
-      throw err
-    }
+    if (err.statusCode !== 404) throw err
   })
 
   let webUrl
