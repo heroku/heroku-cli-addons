@@ -239,10 +239,10 @@ describe('resolve', () => {
 
     it('falls back to searching by addon and ignores addon_service if not passed', () => {
       let api = nock('https://api.heroku.com:443')
-        .post('/actions/addon-attachments/resolve', {'app': 'myapp', 'addon_attachment': 'myattachment-3', 'addon_service': null}).reply(404)
+        .post('/actions/addon-attachments/resolve', {'app': 'myapp', 'addon_attachment': 'myattachment-3'}).reply(404)
 
       let appAddon = nock('https://api.heroku.com:443')
-        .post('/actions/addons/resolve', {'app': 'myapp', 'addon': 'myattachment-3', 'addon_service': null}).reply(200, [{id: '1e97e8ba-fd24-48a4-8118-eaf287eb7a0f', name: 'myaddon-3'}])
+        .post('/actions/addons/resolve', {'app': 'myapp', 'addon': 'myattachment-3'}).reply(200, [{id: '1e97e8ba-fd24-48a4-8118-eaf287eb7a0f', name: 'myaddon-3'}])
 
       let appAttachment = nock('https://api.heroku.com:443')
         .get('/addons/1e97e8ba-fd24-48a4-8118-eaf287eb7a0f/addon-attachments').reply(200, [{app: {name: 'myapp'}, name: 'some-random-name', addon_service: {name: 'slowdb'}}])
