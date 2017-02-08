@@ -15,7 +15,7 @@ function * run (context, heroku) {
   for (let addon of addons) {
     // prevent deletion of app when context.app is set but the addon is attached to a different app
     let app = addon.app.name
-    if (context.app && app !== context.app) throw new Error(`${cli.color.addon(addons[0].name)} is on ${cli.color.app(app)} not ${cli.color.app(context.app)}`)
+    if (context.app && app !== context.app) throw new Error(`${cli.color.addon(addon.name)} is on ${cli.color.app(app)} not ${cli.color.app(context.app)}`)
   }
   for (let app of toPairs(groupBy(addons, 'app.name'))) {
     addons = app[1]
