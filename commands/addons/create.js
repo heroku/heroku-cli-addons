@@ -65,7 +65,7 @@ function * run (context, heroku) {
     )
   }
 
-  let addon = yield util.trapConfirmationRequired(context, (confirm) => (createAddon(app, config, name, confirm, plan, as)))
+  let addon = yield util.trapConfirmationRequired(context.app, context.flags.confirm, (confirm) => (createAddon(app, config, name, confirm, plan, as)))
 
   if (addon.provision_message) { cli.log(addon.provision_message) }
 
