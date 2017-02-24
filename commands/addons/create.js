@@ -72,7 +72,7 @@ function * run (context, heroku) {
   if (addon.state === 'provisioning') {
     if (context.flags.wait) {
       cli.log(`Waiting for ${cli.color.addon(addon.name)}...`)
-      addon = yield waitForAddonProvisioning(context, heroku, addon, 5)
+      addon = yield waitForAddonProvisioning(heroku, addon, 5)
       cli.log(formatConfigVarsMessage(addon))
     } else {
       cli.log(`${cli.color.addon(addon.name)} is being created in the background. The app will restart when complete...`)
