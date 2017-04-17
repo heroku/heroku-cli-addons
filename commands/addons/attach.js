@@ -17,7 +17,7 @@ function * run (context, heroku) {
       confirm
     }
     if (credential) {
-      body.namespace = { name: 'credential:' + credential }
+      body.namespace = 'credential:' + credential
     }
     return cli.action(
       `Attaching ${cli.color.addon(addon.name)}${as ? ' as ' + cli.color.attachment(as) : ''} to ${cli.color.app(app)}`,
