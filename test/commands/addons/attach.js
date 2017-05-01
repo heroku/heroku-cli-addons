@@ -78,7 +78,7 @@ Setting foo config vars and restarting myapp... done, v10
       .reply(200, [{version: 10}])
     return cmd.run({app: 'myapp', args: {addon_name: 'postgres-123'}, flags: {credential: 'hello'}})
       .then(() => expect(cli.stdout, 'to be empty'))
-      .then(() => expect(cli.stderr, 'to equal', `Attaching postgres-123 to myapp... done
+      .then(() => expect(cli.stderr, 'to equal', `Attaching hello of postgres-123 to myapp... done
 Setting POSTGRES_HELLO config vars and restarting myapp... done, v10
 `))
       .then(() => api.done())
