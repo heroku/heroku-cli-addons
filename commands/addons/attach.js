@@ -20,7 +20,7 @@ function * run (context, heroku) {
       body.namespace = 'credential:' + credential
     }
     return cli.action(
-      `Attaching ${cli.color.addon(addon.name)}${as ? ' as ' + cli.color.attachment(as) : ''} to ${cli.color.app(app)}`,
+      `Attaching ${credential ? cli.color.addon(credential) + ' of ' : ''}${cli.color.addon(addon.name)}${as ? ' as ' + cli.color.attachment(as) : ''} to ${cli.color.app(app)}`,
       heroku.request({
         path: '/addon-attachments',
         method: 'POST',
