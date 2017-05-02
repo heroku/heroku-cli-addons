@@ -52,7 +52,7 @@ module.exports = {
   needsApp: true,
   flags: [
     {name: 'as', description: 'name for add-on attachment', hasValue: true},
-    {name: 'credential', description: '(for postgres credentials only) credential name', hasValue: true},
+    {name: 'credential', description: 'credential name for scoped access to Heroku Postgres', hasValue: true},
     {name: 'confirm', description: 'overwrite existing add-on attachment with same name', hasValue: true}
   ],
   args: [{name: 'addon_name'}],
