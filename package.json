@@ -30,6 +30,11 @@
     "time-require": "0.1.2",
     "unexpected": "10.25.0"
   },
+  "files": [
+    "index.js",
+    "commands",
+    "lib"
+  ],
   "homepage": "https://github.com/heroku/heroku-cli-addons",
   "keywords": [
     "heroku-plugin"
