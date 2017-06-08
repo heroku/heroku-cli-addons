@@ -58,7 +58,7 @@ heroku-db1:premium-0
 
 See more plan information with heroku addons:plans heroku-db1
 
-[https://devcenter.heroku.com/articles/managing-add-ons](https://devcenter.heroku.com/articles/managing-add-ons)`)
+https://devcenter.heroku.com/articles/managing-add-ons`)
       .then(() => api.done())
   })
 
