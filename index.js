@@ -4,8 +4,7 @@ const flatten = require('lodash.flatten')
 
 exports.topic = {
   name: 'addons',
-  overview: `
-Overview of Add-ons:
+  overview: `Overview of Add-ons:
 
   Add-ons are created with the \`addons:create\` command, providing a reference
   to an add-on service (such as \`heroku-postgresql\`) or a service and plan
