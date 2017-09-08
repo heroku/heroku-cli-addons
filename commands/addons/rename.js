@@ -27,5 +27,8 @@ module.exports = {
   args: [{name: 'addon'}, {name: 'name'}],
   run: run,
   usage: `${topic}:rename ADDON NEW_NAME`,
-  description: 'Rename an add-on.'
+  description: 'Rename an add-on.',
+  help: `Example:
+
+    $ heroku addons:rename redis-oldname-123 redis-newname-456`
 }

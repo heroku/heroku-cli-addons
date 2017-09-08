@@ -27,5 +27,8 @@ module.exports = {
   args: [{name: 'addon'}],
   flags: [{name: 'show-url', description: 'show URL, do not open browser'}],
   run: cli.command({preauth: true}, co.wrap(run)),
-  description: "open an add-on's Dev Center documentation in your browser"
+  description: "open an add-on's Dev Center documentation in your browser",
+  help: `Example:
+
+    $ heroku addons:docs heroku-postgresql`
 }

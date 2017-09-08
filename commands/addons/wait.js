@@ -44,5 +44,8 @@ module.exports = {
   flags: [{name: 'wait-interval', description: 'how frequently to poll in seconds', hasValue: true}],
   run: cli.command({preauth: true}, co.wrap(run)),
   usage: `${topic}:wait ADDON`,
-  description: 'Show provisioning status of the add-ons on the app'
+  description: 'Show provisioning status of the add-ons on the app',
+  help: `Example:
+
+    $ heroku addons:wait --app quiet-island-1337`
 }

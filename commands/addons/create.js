@@ -59,7 +59,16 @@ const cmd = {
     {name: 'confirm', description: 'overwrite existing config vars or existing add-on attachments', hasValue: true},
     {name: 'wait', description: 'watch add-on creation status and exit when complete'}
   ],
-  run: cli.command({preauth: true}, co.wrap(run))
+  run: cli.command({preauth: true}, co.wrap(run)),
+  help: `Example:
+
+    $ heroku addons:create heroku-redis --app smarmy-apple-1337
+     Creating heroku-redis on ⬢ smarmy-apple-1337...
+     Your add-on should be available in a few minutes.
+     ! WARNING: Data stored in hobby plans on Heroku Redis are not persisted.
+     redis-imperial-1337 is being created in the background. The app will restart when complete...
+     Use heroku addons:info smarmy-apple-1337 to check creation progress
+     Use heroku addons:docs heroku-redis to view documentation`
 }
 
 module.exports = [

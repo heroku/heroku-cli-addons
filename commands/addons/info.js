@@ -56,5 +56,8 @@ module.exports = {
   args: [{name: 'addon'}],
   run: run,
   usage: `${topic}:info ADDON`,
-  description: 'Show info about an add-on and its attachments.'
+  description: 'Show info about an add-on and its attachments.',
+  help: `Example:
+
+    $ heroku addons:info redis-symmetrical-100`
 }
