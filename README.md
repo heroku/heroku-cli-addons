@@ -43,10 +43,10 @@ DESCRIPTION
   is implied. Explicitly providing either flag overrides the default
   behavior.
 
-  Examples:
+EXAMPLES
+  $ heroku addons --all
 
-       $ heroku addons --all
-       $ heroku addons --app acme-inc-www
+  $ heroku addons --app acme-inc-www
 ```
 
 ## `heroku addons:attach ADDON_NAME`
@@ -137,7 +137,6 @@ OPTIONS
   -r, --remote=remote  git remote of app to use
 
 DESCRIPTION
-
   See available plans with `heroku addons:plans SERVICE`.
 
   Note that `heroku addons:upgrade` and `heroku addons:downgrade` are the same.
@@ -145,15 +144,12 @@ DESCRIPTION
 
   [https://devcenter.heroku.com/articles/managing-add-ons](https://devcenter.heroku.com/articles/managing-add-ons)
 
-  Examples:
+EXAMPLE
+  Upgrade an add-on by service name:
+  $ heroku addons:upgrade heroku-redis:premium-2
 
-     Upgrade an add-on by service name:
-
-       $ heroku addons:upgrade heroku-redis:premium-2
-
-     Upgrade a specific add-on:
-
-       $ heroku addons:upgrade swimming-briskly-123 heroku-redis:premium-2
+  Upgrade a specific add-on:
+  $ heroku addons:upgrade swimming-briskly-123 heroku-redis:premium-2
 ```
 
 ## `heroku addons:info ADDON`
@@ -233,7 +229,6 @@ OPTIONS
   -r, --remote=remote  git remote of app to use
 
 DESCRIPTION
-
   See available plans with `heroku addons:plans SERVICE`.
 
   Note that `heroku addons:upgrade` and `heroku addons:downgrade` are the same.
@@ -241,15 +236,12 @@ DESCRIPTION
 
   [https://devcenter.heroku.com/articles/managing-add-ons](https://devcenter.heroku.com/articles/managing-add-ons)
 
-  Examples:
+EXAMPLE
+  Upgrade an add-on by service name:
+  $ heroku addons:upgrade heroku-redis:premium-2
 
-     Upgrade an add-on by service name:
-
-       $ heroku addons:upgrade heroku-redis:premium-2
-
-     Upgrade a specific add-on:
-
-       $ heroku addons:upgrade swimming-briskly-123 heroku-redis:premium-2
+  Upgrade a specific add-on:
+  $ heroku addons:upgrade swimming-briskly-123 heroku-redis:premium-2
 ```
 
 ## `heroku addons:wait ADDON`
