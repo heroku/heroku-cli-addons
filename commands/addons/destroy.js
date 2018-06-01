@@ -5,13 +5,17 @@ const co = require('co')
 
 function * run (context, heroku) {
   const resolve = require('../../lib/resolve')
-  const groupBy = require('lodash.groupby')
-  const toPairs = require('lodash.topairs')
+  const {groupBy, toPairs} = require('lodash')
 
   let force = context.flags.force || process.env.HEROKU_FORCE === '1'
   if (context.args.length === 0) throw new Error('Missing add-on name')
 
   let addons = yield context.args.map(name => resolve.addon(heroku, context.app, name))
+  for (let addon of addons) {
+    // prevent deletion of app when context.app is set but the addon is attached to a different app
+    let app = addon.app.name
+    if (context.app && app !== context.app) throw new Error(`${cli.color.addon(addon.name)} is on ${cli.color.app(app)} not ${cli.color.app(context.app)}`)
+  }
   for (let app of toPairs(groupBy(addons, 'app.name'))) {
     addons = app[1]
     app = app[0]
@@ -31,6 +35,7 @@ function * run (context, heroku) {
 let cmd = {
   topic: 'addons',
   description: 'permanently destroy an add-on resource',
+  usage: 'addons:destroy [ADDON]... [flags]',
   needsAuth: true,
   wantsApp: true,
   flags: [

@@ -1,7 +1,7 @@
 {
-  "name": "heroku-cli-addons",
+  "name": "@heroku-cli/plugin-addons",
   "description": "`heroku addons:*` commands",
-  "version": "1.1.8",
+  "version": "1.2.30",
   "author": "Bo Jeanes @bjeanes",
   "bugs": {
     "url": "https://github.com/heroku/heroku-cli-addons/issues"
@@ -9,26 +9,27 @@
   "dependencies": {
     "co": "4.6.0",
     "co-wait": "0.0.0",
-    "heroku-cli-util": "6.0.15",
-    "lodash.flatten": "4.3.0",
-    "lodash.groupby": "4.5.1",
-    "lodash.memoize": "4.1.1",
-    "lodash.merge": "4.5.1",
-    "lodash.some": "4.5.1",
-    "lodash.sortby": "4.6.1",
-    "lodash.topairs": "4.2.0",
-    "lodash.values": "4.2.0",
-    "printf": "0.2.5"
+    "heroku-cli-util": "^8.0.9",
+    "lodash": "^4.17.10",
+    "printf": "0.3.0"
   },
   "devDependencies": {
-    "chai": "^3.2.0",
-    "mocha": "3.0.2",
-    "nock": "8.0.0",
-    "nyc": "7.1.0",
-    "standard": "7.1.2",
-    "time-require": "0.1.2",
-    "unexpected": "10.15.1"
+    "@oclif/dev-cli": "^1.13.24",
+    "@oclif/plugin-legacy": "^1.0.15",
+    "chai": "^4.1.2",
+    "lolex": "^2.7.0",
+    "mocha": "^5.2.0",
+    "nock": "^9.0.13",
+    "nyc": "^11.8.0",
+    "standard": "^11.0.1",
+    "unexpected": "^10.38.0"
   },
+  "files": [
+    ".oclif.manifest.json",
+    "index.js",
+    "lib",
+    "commands"
+  ],
   "homepage": "https://github.com/heroku/heroku-cli-addons",
   "keywords": [
     "heroku-plugin"
@@ -37,8 +38,18 @@
   "main": "index.js",
   "repository": "https://github.com/heroku/heroku-cli-addons",
   "scripts": {
-    "postversion": "npm publish && git push && git push --tags",
-    "preversion": "npm test",
-    "test": "nyc mocha && standard"
+    "release": "np",
+    "test": "nyc mocha && standard",
+    "prepublishOnly": "oclif-dev manifest",
+    "version": "oclif-dev readme && git add README.md",
+    "postpublish": "rm .oclif.manifest.json"
+  },
+  "cli-engine": {
+    "bin": "heroku",
+    "topics": {
+      "addons": {
+        "description": "tools and services for developing, extending, and operating your app"
+      }
+    }
   }
 }

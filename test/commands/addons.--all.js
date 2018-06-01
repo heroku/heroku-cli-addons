@@ -20,10 +20,6 @@ describe('addons --all', function () {
   context('with add-ons', function () {
     beforeEach(function () {
       nock('https://api.heroku.com', {reqheaders: {'Accept-Expansion': 'addon_service,plan'}})
-        .matchHeader('Accept-Expansion', function (val) {
-          let vals = val.split(',')
-          return vals.indexOf('addon_service') > -1 && vals.indexOf('plan') > -1
-        })
         .get('/addons')
         .reply(200, addons)
     })
@@ -31,7 +27,7 @@ describe('addons --all', function () {
     it('prints add-ons in a table', function () {
       return cmd.run({flags: {}}).then(function () {
         util.expectOutput(cli.stdout,
-`Owning App    Add-on     Plan                         Price      State
+          `Owning App    Add-on     Plan                         Price      State
 ────────────  ─────────  ───────────────────────────  ─────────  ────────
 acme-inc-api  api-redis  heroku-redis:premium-2       $60/month  created
 acme-inc-www  www-db     heroku-postgresql:hobby-dev  free       created
@@ -52,6 +48,28 @@ acme-inc-www  www-redis  heroku-redis:premium-2       $60/month  creating`)
           .then(function () {
             expect(JSON.parse(cli.stdout)[0].name).to.eq('www-db')
           })
+      })
+    })
+  })
+
+  context('with a grandfathered add-on', function () {
+    beforeEach(function () {
+      let addon = fixtures.addons['dwh-db']
+      addon.billed_price = { cents: 10000 }
+
+      nock('https://api.heroku.com', {reqheaders: {
+        'Accept-Expansion': 'addon_service,plan'
+      }})
+        .get('/addons')
+        .reply(200, [addon])
+    })
+
+    it('prints add-ons in a table with the grandfathered price', function () {
+      return cmd.run({flags: {}}).then(function () {
+        util.expectOutput(cli.stdout,
+          `Owning App    Add-on  Plan                          Price       State
+────────────  ──────  ────────────────────────────  ──────────  ───────
+acme-inc-dwh  dwh-db  heroku-postgresql:standard-2  $100/month  created`)
       })
     })
   })

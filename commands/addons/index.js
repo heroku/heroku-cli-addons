@@ -9,12 +9,10 @@ function * run (ctx, api) {
   const style = util.style
   const formatPrice = util.formatPrice
   const formatState = util.formatState
+  const grandfatheredPrice = util.grandfatheredPrice
   const printf = require('printf')
 
-  const groupBy = require('lodash.groupby')
-  const some = require('lodash.some')
-  const sortBy = require('lodash.sortby')
-  const values = require('lodash.values')
+  const {groupBy, some, sortBy, values} = require('lodash')
 
   // Gets *all* attachments and add-ons and filters locally because the API
   // returns *owned* items not associated items.
@@ -22,7 +20,9 @@ function * run (ctx, api) {
     let attachments, addons
 
     if (app) { // don't disploy attachments globally
-      addons = api.get(`/apps/${app}/addons`, {headers: {'Accept-Expansion': 'addon_service,plan'}})
+      addons = api.get(`/apps/${app}/addons`, {headers: {
+        'Accept-Expansion': 'addon_service,plan'
+      }})
 
       let sudoHeaders = JSON.parse(process.env.HEROKU_HEADERS || '{}')
       if (sudoHeaders['X-Heroku-Sudo'] && !sudoHeaders['X-Heroku-Sudo-User']) {
@@ -42,7 +42,9 @@ function * run (ctx, api) {
       addons = api.request({
         method: 'GET',
         path: '/addons',
-        headers: {'Accept-Expansion': 'addon_service,plan'}
+        headers: {
+          'Accept-Expansion': 'addon_service,plan'
+        }
       })
     }
 
@@ -66,6 +68,8 @@ function * run (ctx, api) {
       if (isRelevantToApp(addon)) {
         addons.push(addon)
       }
+
+      addon.plan.price = grandfatheredPrice(addon)
     })
 
     // Any attachments left didn't have a corresponding add-on record in API.
@@ -256,7 +260,6 @@ function * run (ctx, api) {
 let topic = 'addons'
 module.exports = {
   topic: topic,
-  default: true,
   needsAuth: true,
   wantsApp: true,
   flags: [
@@ -279,74 +282,9 @@ module.exports = {
   help: `The default filter applied depends on whether you are in a Heroku app
 directory. If so, the --app flag is implied. If not, the default of --all
 is implied. Explicitly providing either flag overrides the default
-behavior.
-
-Examples:
-
-  $ heroku ${topic} --all
-  $ heroku ${topic} --app acme-inc-www
-
-Overview of Add-ons:
-
-  Add-ons are created with the \`addons:create\` command, providing a reference
-  to an add-on service (such as \`heroku-postgresql\`) or a service and plan
-  (such as \`heroku-postgresql:hobby-dev\`).
-
-  At creation, each add-on is given a globally unique name. In addition, each
-  add-on has at least one attachment alias to each application which uses the
-  add-on. In all cases, the owning application will be attached to the add-on.
-  An attachment alias is unique to its application, and is used as a prefix to
-  any environment variables it exports to the application.
-
-  In this example, a \`heroku-postgresql\` add-on is created and its given name
-  is \`postgresql-deep-6913\` with a default attachment alias of \`DATABASE\`:
-
-    $ heroku addons:create heroku-postgresql --app my-app
-    Creating postgresql-deep-6913... done, (free)
-    Adding postgresql-deep-6913 to my-app... done
-    Setting DATABASE_URL and restarting my-app... done, v5
-    Database has been created and is available
-
-    $ heroku addons --app my-app
-    Add-on                                     Plan       Price
-    ─────────────────────────────────────────  ─────────  ─────
-    heroku-postgresql (postgresql-deep-6913)   hobby-dev  free
-    └─ as DATABASE
-
-  The add-on name and, in some cases, the attachment alias can be specified by
-  the user. For instance, we can add a second database to the app, specifying
-  both these identifiers:
-
-    $ heroku addons:create heroku-postgresql --app my-app --name main-db --as PRIMARY_DB
-    Creating main-db... done, (free)
-    Adding main-db to my-app... done
-    Setting PRIMARY_DB_URL and restarting my-app... done, v6
-    Database has been created and is available
-
-    $ heroku addons --app my-app
-    Add-on                                     Plan       Price
-    ─────────────────────────────────────────  ─────────  ─────
-    heroku-postgresql (main-db)                hobby-dev  free
-    └─ as PRIMARY_DB
-
-    heroku-postgresql (postgresql-deep-6913)   hobby-dev  free
-    └─ as DATABASE
-
-  Attachment aliases can also be specified when making attachments:
-
-    $ heroku addons:attach main-db --app my-app --as ANOTHER_NAME
-    Attaching main-db as ANOTHER_NAME to my-app... done
-    Setting ANOTHER_NAME vars and restarting my-app... done, v7
-
-    $ heroku addons --app my-app
-    Add-on                                     Plan       Price
-    ─────────────────────────────────────────  ─────────  ─────
-    heroku-postgresql (main-db)                hobby-dev  free
-    ├─ as PRIMARY_DB
-    └─ as ANOTHER_NAME
-
-    heroku-postgresql (postgresql-deep-6913)   hobby-dev  free
-    └─ as DATABASE
-
-  For more information, read https://devcenter.heroku.com/articles/add-ons.`
+behavior.`,
+  examples: [
+    `$ heroku ${topic} --all`,
+    `$ heroku ${topic} --app acme-inc-www`
+  ]
 }

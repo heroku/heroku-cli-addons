@@ -28,8 +28,8 @@ describe('addons:wait', function () {
     context('when the add-on is provisioned', function () {
       beforeEach(function () {
         nock('https://api.heroku.com', {reqheaders: expansionHeaders})
-          .get('/apps/example/addons/www-db')
-          .reply(200, fixtures.addons['www-db']) // provisioned
+          .post('/actions/addons/resolve', {'app': null, 'addon': 'www-db'})
+          .reply(200, [fixtures.addons['www-db']]) // provisioned
       })
 
       it('prints output indicating that it is done', function () {
@@ -42,8 +42,8 @@ describe('addons:wait', function () {
       it('waits until the add-on is provisioned, then shows config vars', function () {
         // Call to resolve the add-on:
         let resolverResponse = nock('https://api.heroku.com')
-          .get('/addons/www-redis')
-          .reply(200, fixtures.addons['www-redis']) // provisioning
+          .post('/actions/addons/resolve', {'app': null, 'addon': 'www-redis'})
+          .reply(200, [fixtures.addons['www-redis']]) // provisioning
 
         let provisioningResponse = nock('https://api.heroku.com', {reqheaders: expansionHeaders})
           .get('/apps/acme-inc-www/addons/www-redis')
@@ -77,10 +77,111 @@ describe('addons:wait', function () {
         nock('https://api.heroku.com', {reqheaders: expansionHeaders})
           .get('/apps/acme-inc-www/addons/www-redis')
           .reply(200, deprovisionedAddon)
+        return cmd.run({flags: {}, args: {addon: 'www-redis'}})
+          .then(() => { throw new Error('unreachable') })
+          .catch((err) => expect(err.message, 'to equal', 'The add-on was unable to be created, with status deprovisioned'))
+      })
+    })
+  })
 
-        let cmdPromise = cmd.run({flags: {}, args: {addon: 'www-redis'}})
+  context('waiting for add-ons', function () {
+    context('for an app', function () {
+      it('waits for addons serially', function () {
+        let ignoredAddon = _.clone(fixtures.addons['www-db'])
+        ignoredAddon.state = 'provisioned'
 
-        expect(cmdPromise, 'to be rejected with', 'The add-on was unable to be created, with status deprovisioned')
+        let wwwAddon = _.clone(fixtures.addons['www-db'])
+        wwwAddon.state = 'provisioning'
+
+        let redisAddon = _.clone(fixtures.addons['www-redis'])
+        redisAddon.state = 'provisioning'
+
+        let resolverResponse = nock('https://api.heroku.com')
+          .get('/apps/acme-inc-www/addons')
+          .reply(200, [ignoredAddon, wwwAddon, redisAddon])
+
+        let wwwResponse = nock('https://api.heroku.com', {reqheaders: expansionHeaders})
+          .get('/apps/acme-inc-www/addons/www-db')
+          .reply(200, wwwAddon)
+
+        let redisResponse = nock('https://api.heroku.com', {reqheaders: expansionHeaders})
+          .get('/apps/acme-inc-www/addons/www-redis')
+          .reply(200, redisAddon)
+
+        let provisionedWwwAddon = _.clone(fixtures.addons['www-db'])
+        provisionedWwwAddon.state = 'provisioned'
+        provisionedWwwAddon.config_vars = ['WWW_URL']
+
+        let provisionedRedisAddon = _.clone(fixtures.addons['www-redis'])
+        provisionedRedisAddon.state = 'provisioned'
+        provisionedRedisAddon.config_vars = ['REDIS_URL']
+
+        let provisionedRedisResponse = nock('https://api.heroku.com', {reqheaders: expansionHeaders})
+          .get('/apps/acme-inc-www/addons/www-redis')
+          .reply(200, provisionedRedisAddon)
+
+        let provisionedWwwResponse = nock('https://api.heroku.com', {reqheaders: expansionHeaders})
+          .get('/apps/acme-inc-www/addons/www-db')
+          .reply(200, provisionedWwwAddon)
+
+        return cmd.run({args: {addon: null}, flags: {'wait-interval': '1'}, app: 'acme-inc-www'})
+          .then(() => resolverResponse.done())
+          .then(() => redisResponse.done())
+          .then(() => wwwResponse.done())
+          .then(() => provisionedRedisResponse.done())
+          .then(() => provisionedWwwResponse.done())
+          .then(() => expect(cli.stderr).to.equal('Creating www-db... done\nCreating www-redis... done\n'))
+          .then(() => expect(cli.stdout).to.equal('Created www-db as WWW_URL\nCreated www-redis as REDIS_URL\n'))
+      })
+    })
+
+    context('for all', function () {
+      it('waits for addons serially', function () {
+        let ignoredAddon = _.clone(fixtures.addons['www-db'])
+        ignoredAddon.state = 'provisioned'
+
+        let wwwAddon = _.clone(fixtures.addons['www-db'])
+        wwwAddon.state = 'provisioning'
+
+        let redisAddon = _.clone(fixtures.addons['www-redis'])
+        redisAddon.state = 'provisioning'
+
+        let resolverResponse = nock('https://api.heroku.com')
+          .get('/addons')
+          .reply(200, [ignoredAddon, wwwAddon, redisAddon])
+
+        let wwwResponse = nock('https://api.heroku.com', {reqheaders: expansionHeaders})
+          .get('/apps/acme-inc-www/addons/www-db')
+          .reply(200, wwwAddon)
+
+        let redisResponse = nock('https://api.heroku.com', {reqheaders: expansionHeaders})
+          .get('/apps/acme-inc-www/addons/www-redis')
+          .reply(200, redisAddon)
+
+        let provisionedWwwAddon = _.clone(fixtures.addons['www-db'])
+        provisionedWwwAddon.state = 'provisioned'
+        provisionedWwwAddon.config_vars = ['WWW_URL']
+
+        let provisionedRedisAddon = _.clone(fixtures.addons['www-redis'])
+        provisionedRedisAddon.state = 'provisioned'
+        provisionedRedisAddon.config_vars = ['REDIS_URL']
+
+        let provisionedRedisResponse = nock('https://api.heroku.com', {reqheaders: expansionHeaders})
+          .get('/apps/acme-inc-www/addons/www-redis')
+          .reply(200, provisionedRedisAddon)
+
+        let provisionedWwwResponse = nock('https://api.heroku.com', {reqheaders: expansionHeaders})
+          .get('/apps/acme-inc-www/addons/www-db')
+          .reply(200, provisionedWwwAddon)
+
+        return cmd.run({args: {addon: null}, flags: {'wait-interval': '1'}, app: null})
+          .then(() => resolverResponse.done())
+          .then(() => redisResponse.done())
+          .then(() => wwwResponse.done())
+          .then(() => provisionedRedisResponse.done())
+          .then(() => provisionedWwwResponse.done())
+          .then(() => expect(cli.stderr).to.equal('Creating www-db... done\nCreating www-redis... done\n'))
+          .then(() => expect(cli.stdout).to.equal('Created www-db as WWW_URL\nCreated www-redis as REDIS_URL\n'))
       })
     })
   })

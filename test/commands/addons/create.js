@@ -5,6 +5,8 @@ const cmd = commands.find(c => c.topic === 'addons' && c.command === 'create')
 const expect = require('unexpected')
 const lolex = require('lolex')
 const _ = require('lodash')
+const Config = require('@oclif/config')
+let config
 
 describe('addons:create', () => {
   let api
@@ -20,7 +22,8 @@ describe('addons:create', () => {
     provision_message: 'provision message'
   }
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    config = await Config.load()
     cli.mockConsole()
     api = nock('https://api.heroku.com:443')
   })
@@ -30,6 +33,39 @@ describe('addons:create', () => {
     nock.cleanAll()
   })
 
+  context('creating a db with a name', () => {
+    beforeEach(() => {
+      api.post('/apps/myapp/addons', {
+        plan: {name: 'heroku-postgresql:standard-0'},
+        name: 'foobar'
+      })
+        .reply(200, addon)
+    })
+
+    it('passes name through to the API', () => {
+      return cmd.run({
+        config,
+        app: 'myapp',
+        args: ['heroku-postgresql:standard-0'],
+        flags: {name: 'foobar'}
+      })
+        .then(() => api.done())
+    })
+  })
+
+  context('calling addons:create without a plan', () => {
+    it('errors out with usage', () => {
+      return cmd.run({
+        config,
+        app: 'myapp',
+        args: [],
+        flags: {name: 'foobar'}
+      })
+        .then(() => { throw new Error('unreachable') })
+        .catch((err) => expect(err.message, 'to equal', 'Usage: heroku addons:create SERVICE:PLAN'))
+    })
+  })
+
   context('creating a db', () => {
     beforeEach(() => {
       api.post('/apps/myapp/addons', {
@@ -37,11 +73,12 @@ describe('addons:create', () => {
         config: {follow: 'otherdb', rollback: true, foo: true},
         plan: {name: 'heroku-postgresql:standard-0'}
       })
-      .reply(200, addon)
+        .reply(200, addon)
     })
 
     it('creates an add-on with proper output', () => {
       return cmd.run({
+        config,
         app: 'myapp',
         args: ['heroku-postgresql:standard-0', '--rollback', '--follow', 'otherdb', '--foo'],
         flags: {as: 'mydb'}
@@ -55,6 +92,7 @@ Use heroku addons:docs heroku-db3 to view documentation
 
     it('creates an addon with = args', () => {
       return cmd.run({
+        config,
         app: 'myapp',
         args: ['heroku-postgresql:standard-0', '--rollback', '--follow=otherdb', '--foo'],
         flags: {as: 'mydb'}
@@ -63,6 +101,7 @@ Use heroku addons:docs heroku-db3 to view documentation
 
     it('turns args value true into literal true, not a string', () => {
       return cmd.run({
+        config,
         app: 'myapp',
         args: ['heroku-postgresql:standard-0', '--rollback', '--follow=otherdb', '--foo=true'],
         flags: {as: 'mydb'}
@@ -81,11 +120,12 @@ Use heroku addons:docs heroku-db3 to view documentation
           config: {},
           plan: {name: 'heroku-postgresql:standard-0'}
         })
-        .reply(200, asyncAddon)
+          .reply(200, asyncAddon)
       })
 
       it('creates an add-on with output about async provisioning', () => {
         return cmd.run({
+          config,
           app: 'myapp',
           args: ['heroku-postgresql:standard-0'],
           flags: {as: 'mydb'}
@@ -110,11 +150,12 @@ Use heroku addons:docs heroku-db3 to view documentation
           config: {},
           plan: {name: 'heroku-postgresql:standard-0'}
         })
-        .reply(200, asyncAddon)
+          .reply(200, asyncAddon)
       })
 
       it('creates an add-on with output about async provisioning', () => {
         return cmd.run({
+          config,
           app: 'myapp',
           args: ['heroku-postgresql:standard-0'],
           flags: {as: 'mydb'}
@@ -138,11 +179,12 @@ Use heroku addons:docs heroku-db3 to view documentation
           config: {},
           plan: {name: 'heroku-postgresql:standard-0'}
         })
-        .reply(200, asyncAddon)
+          .reply(200, asyncAddon)
       })
 
       it('creates an add-on with output about async provisioning', () => {
         return cmd.run({
+          config,
           app: 'myapp',
           args: ['heroku-postgresql:standard-0'],
           flags: {as: 'mydb'}
@@ -170,7 +212,7 @@ Use heroku addons:docs heroku-db3 to view documentation
           config: {wait: true},
           plan: {name: 'heroku-postgresql:standard-0'}
         })
-        .reply(200, asyncAddon)
+          .reply(200, asyncAddon)
 
         provisioningResponse = api.get('/apps/myapp/addons/db3-swiftly-123')
           .reply(200, asyncAddon)
@@ -188,6 +230,7 @@ Use heroku addons:docs heroku-db3 to view documentation
 
       it('waits for response', () => {
         return cmd.run({
+          config,
           app: 'myapp',
           args: ['heroku-postgresql:standard-0', '--wait'],
           flags: {as: 'mydb', wait: true}
@@ -212,15 +255,18 @@ Use heroku addons:docs heroku-db3 to view documentation
           attachment: {name: 'mydb'},
           plan: {name: 'heroku-postgresql:standard-0'}
         })
-        .reply(200, deprovisionedAddon) // failed
+          .reply(200, deprovisionedAddon) // failed
 
         let cmdPromise = cmd.run({
+          config,
           app: 'myapp',
           args: ['heroku-postgresql:standard-0'],
           flags: {as: 'mydb'}
         })
 
-        expect(cmdPromise, 'to be rejected with', 'The add-on was unable to be created, with status deprovisioned')
+        return cmdPromise
+          .then(() => { throw new Error('unreachable') })
+          .catch((err) => expect(err.message, 'to equal', 'The add-on was unable to be created, with status deprovisioned'))
       })
     })
   })
@@ -232,17 +278,18 @@ Use heroku addons:docs heroku-db3 to view documentation
         config: {follow: 'otherdb', rollback: true, foo: true},
         plan: {name: 'heroku-postgresql:standard-0'}
       })
-      .reply(423,
-        {'id': 'confirmation_required', 'message': 'This add-on is not automatically networked with this Private Space. '},
-        {'X-Confirmation-Required': 'myapp-confirm'})
+        .reply(423,
+          {'id': 'confirmation_required', 'message': 'This add-on is not automatically networked with this Private Space. '},
+          {'X-Confirmation-Required': 'myapp-confirm'})
     })
 
     it('aborts if confirmation does not match', () => {
       return expect(cmd.run({
+        config,
         app: 'myapp',
         args: ['heroku-postgresql:standard-0', '--rollback', '--follow', 'otherdb', '--foo'],
         flags: {as: 'mydb', confirm: 'not-my-app'}
-      }), 'when rejected', 'to equal', 'Confirmation not-my-app did not match myapp. Aborted.')
+      }), 'to be rejected with error satisfying', 'Confirmation not-my-app did not match myapp. Aborted.')
     })
 
     it('succeeds if confirmation does match', () => {
@@ -252,9 +299,10 @@ Use heroku addons:docs heroku-db3 to view documentation
         plan: {name: 'heroku-postgresql:standard-0'},
         confirm: 'myapp'
       })
-      .reply(200, addon)
+        .reply(200, addon)
 
       return cmd.run({
+        config,
         app: 'myapp',
         args: ['heroku-postgresql:standard-0', '--rollback', '--follow', 'otherdb', '--foo'],
         flags: {as: 'mydb', confirm: 'myapp'}
@@ -273,11 +321,12 @@ Use heroku addons:docs heroku-db3 to view documentation
         config: {follow: '--otherdb', rollback: true, foo: true},
         plan: {name: 'heroku-postgresql:standard-0'}
       })
-      .reply(200, addon)
+        .reply(200, addon)
     })
 
     it('creates an addon with =-- args', () => {
       return cmd.run({
+        config,
         app: 'myapp',
         args: ['heroku-postgresql:standard-0', '--rollback', '--follow=--otherdb', '--foo'],
         flags: {as: 'mydb'}
@@ -294,11 +343,12 @@ Use heroku addons:docs heroku-db3 to view documentation
         config: {},
         plan: {name: 'heroku-postgresql:standard-0'}
       })
-      .reply(200, noConfigAddon)
+        .reply(200, noConfigAddon)
     })
 
     it('creates an add-on without the config vars listed', () => {
       return cmd.run({
+        config,
         app: 'myapp',
         args: ['heroku-postgresql:standard-0'],
         flags: {as: 'mydb'}
