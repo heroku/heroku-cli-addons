@@ -63,5 +63,8 @@ module.exports = {
     {name: 'confirm', description: 'overwrite existing add-on attachment with same name', hasValue: true}
   ],
   args: [{name: 'addon_name'}],
-  run: cli.command({preauth: true}, co.wrap(run))
+  run: cli.command({preauth: true}, co.wrap(run)),
+  help: `Example:
+
+    $ heroku addons:attach postgresql-perpendicular-84315 --as postgresql-bodacious-1234 --app soothing-island-86754`
 }

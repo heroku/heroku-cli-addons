@@ -95,5 +95,8 @@ module.exports = {
   args: [{name: 'addon'}],
   flags: [{name: 'show-url', description: 'show URL, do not open browser'}],
   run: cli.command({preauth: true}, co.wrap(run)),
-  description: "open an add-on's dashboard in your browser"
+  description: "open an add-on's dashboard in your browser",
+  help: `Example:
+
+    $ heroku addons:open redis-symmetrical-100`
 }

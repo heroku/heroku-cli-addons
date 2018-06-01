@@ -36,5 +36,8 @@ module.exports = {
   needsAuth: true,
   needsApp: true,
   args: [{name: 'attachment_name'}],
-  run: cli.command({preauth: true}, co.wrap(run))
+  run: cli.command({preauth: true}, co.wrap(run)),
+  help: `Example:
+
+    $ heroku addons:detach redis-imperial-1337 --app peaceful-foo-1337`
 }

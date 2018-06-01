@@ -43,7 +43,10 @@ let cmd = {
     {name: 'confirm', char: 'c', hasValue: true}
   ],
   variableArgs: true,
-  run: cli.command({preauth: true}, co.wrap(run))
+  run: cli.command({preauth: true}, co.wrap(run)),
+  help: `Example:
+
+    $ heroku addons:destroy redis-imperial-1337`
 }
 
 module.exports = [
