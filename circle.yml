@@ -10,4 +10,4 @@ machine:
 
 test:
   post:
-    - ./node_modules/.bin/nyc report --reporter=text-lcov > coverage.lcov && bash <(curl -s https://codecov.io/bash)
+    - echo 'done!'
