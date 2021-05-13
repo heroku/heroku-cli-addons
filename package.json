@@ -11,7 +11,7 @@
     "co-wait": "0.0.0",
     "heroku-cli-util": "^8.0.9",
     "lodash": "^4.17.10",
-    "printf": "0.3.0"
+    "printf": "0.6.1"
   },
   "devDependencies": {
     "@oclif/dev-cli": "^1.13.30",
